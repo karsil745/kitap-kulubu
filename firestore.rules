@@ -1,0 +1,322 @@
+rules_version = '2';
+
+// Firestore güvenlik kuralları.
+// Bunları Firebase Console > Firestore Database > "Kurallar (Rules)" sekmesine
+// yapıştırıp "Yayınla" demen gerekiyor.
+//
+// ÖNEMLİ — bu kuralları yayınlamadan ÖNCE Console'dan mevcut üyelerin
+// users/{uid} belgelerine `approved: true` (boolean) ekle. Aksi halde sen dahil
+// herkes yazma yetkisini kaybeder. Yöneticiler (role: "admin") otomatik üyedir.
+//
+// Tasarım notu: Firebase Auth'ta Google girişi açık olduğu için "giriş yapmış
+// olmak" bir şey ifade etmez — Google hesabı olan herkes giriş yapabilir.
+// O yüzden yazma yetkisinin ölçütü isMember(), request.auth != null değil.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function signedIn() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    // Giriş yapan kullanıcı yönetici mi? (users/{uid}.role == "admin")
+    function isAdmin() {
+      return signedIn() && userDoc().role == "admin";
+    }
+
+    // Kulübe kabul edilmiş üye mi? (users/{uid}.approved == true)
+    // Hem `approved` hem `role` sadece Firebase Console'dan elle verilir.
+    function isMember() {
+      return signedIn() && (userDoc().approved == true || userDoc().role == "admin");
+    }
+
+    // Bir yazının yalnızca izin verilen alanlara dokunduğunu doğrular.
+    function onlyFields(allowed) {
+      return request.resource.data.keys().hasOnly(allowed);
+    }
+
+    // Metin alanı: string ve en fazla `max` karakter (kota şişirmeyi engeller).
+    function shortText(value, max) {
+      return value is string && value.size() <= max;
+    }
+
+    // Kapak görseli: ya yok/null, ya da Open Library'nin kapak sunucusundan.
+    // Serbest URL'ye izin verilirse kapak alanı ziyaretçileri izleyen bir
+    // piksele dönüştürülebilir (siteyi açan herkesin IP'si saldırgana gider).
+    function safeCover(data) {
+      return !("coverImage" in data)
+        || data.coverImage == null
+        || data.coverImage.matches('https://covers[.]openlibrary[.]org/.*');
+    }
+
+    // Kitaplar: herkes okuyabilir (giriş yapmamış ziyaretçiler de görsün).
+    match /books/{bookId} {
+      allow read: if true;
+
+      // Yönetici serbest (geçmiş kitap arşivini kuran syncAllContent bu yoldan
+      // recommendedBy: [] ile kayıt açıyor).
+      allow create: if isAdmin() || (
+        isMember()
+        && onlyFields(['title','authorId','era','year','pages','cover','coverImage',
+                       'description','recommendedBy','createdAt'])
+        && ( !("pages" in request.resource.data)
+             || request.resource.data.pages == null
+             || ( request.resource.data.pages is int
+                  && request.resource.data.pages > 0
+                  && request.resource.data.pages <= 20000 ) )
+        && shortText(request.resource.data.title, 300)
+        && shortText(request.resource.data.description, 5000)
+        && safeCover(request.resource.data)
+        // Kitabı ekleyen kendini önerenlere yazar, başkasını değil.
+        && request.resource.data.recommendedBy == [request.auth.uid]
+      );
+
+      // Sıradan üye SADECE kendi önerisini ekler/çıkarır; başka hiçbir alana
+      // dokunamaz. Aksi halde herkes her kitabın adını/açıklamasını/kapağını
+      // ezebilir ve başkalarının önerilerini silebilirdi.
+      allow update: if isAdmin() || (
+        isMember()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['recommendedBy'])
+        && request.resource.data.recommendedBy.toSet()
+             .difference(resource.data.recommendedBy.toSet())
+             .hasOnly([request.auth.uid])
+        && resource.data.recommendedBy.toSet()
+             .difference(request.resource.data.recommendedBy.toSet())
+             .hasOnly([request.auth.uid])
+      );
+
+      // Silme sadece yöneticide — arama sonucundan yanlış/mükerrer eklenen
+      // kayıtları temizlemek için. Sıradan üye kitap silemez.
+      allow delete: if isAdmin();
+    }
+
+    // Yazarlar: herkes okuyabilir. Onaylı üye yeni yazar oluşturabilir —
+    // çünkü ensureAuthor() kitap öneren sıradan bir üye tarafından çağrılır.
+    match /authors/{authorId} {
+      allow read: if true;
+
+      allow create: if isAdmin() || (
+        isMember()
+        && onlyFields(['name','era','bio','birthYear','deathYear'])
+        && shortText(request.resource.data.name, 200)
+        && shortText(request.resource.data.bio, 10000)
+      );
+
+      // Var olan yazar kaydını düzenlemek yöneticide: yoksa herkes bütün
+      // biyografileri silebilir/değiştirebilirdi. (Uygulamada zaten sadece
+      // yöneticinin "içerikleri güncelle" butonu yazar güncelliyor.)
+      allow update: if isAdmin();
+
+      // Silme kapalı — yazara bağlı kitapların bağlantısının kopmasını önler.
+      allow delete: if false;
+    }
+
+    // Üyeler: giriş yapmış kullanıcılar birbirini görebilir. Ziyaretçiye kapalı
+    // çünkü burada üyelerin gerçek adları ve Google profil fotoğrafları var.
+    match /users/{userId} {
+      allow read: if request.auth != null;
+
+      // Bir kullanıcı kendi profilini oluşturabilir/güncelleyebilir ama
+      // "role" ve "approved" alanlarına dokunamaz — yöneticilik ve üyelik bu
+      // yoldan kazanılamaz, sadece Firebase Console'dan elle atanır.
+      allow create: if request.auth != null && request.auth.uid == userId
+                    && onlyFields(['name','avatar','photo','bio'])
+                    && shortText(request.resource.data.name, 100)
+                    && shortText(request.resource.data.bio, 500);
+
+      allow update: if (
+                      request.auth != null && request.auth.uid == userId
+                      && request.resource.data.diff(resource.data).affectedKeys()
+                           .hasOnly(['name','avatar','photo','bio'])
+                      && shortText(request.resource.data.name, 100)
+                      && shortText(request.resource.data.bio, 500)
+                    ) || (
+                      // Yönetici başkasının üyeliğini onaylar/geri alır.
+                      // SADECE `approved` alanına dokunabilir — `role` hâlâ
+                      // yalnızca Firebase Console'dan elle verilir, yani bir
+                      // yönetici uygulamadan yeni yönetici üretemez.
+                      isAdmin()
+                      && request.resource.data.diff(resource.data).affectedKeys()
+                           .hasOnly(['approved'])
+                      && request.resource.data.approved is bool
+                    );
+
+      allow delete: if false;
+    }
+
+    // Yorumlar/puanlar: herkes okuyabilir. Belge id'si `${bookId}__${uid}`
+    // olduğu için bir kullanıcı bir kitaba en fazla bir yorum yazabilir —
+    // kural bunu id ile data'nın tutarlılığını zorunlu kılarak sağlar.
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create, update: if isMember()
+        && request.resource.data.userId == request.auth.uid
+        && reviewId == request.resource.data.bookId + "__" + request.auth.uid
+        && onlyFields(['bookId','userId','rating','text','createdAt','updatedAt'])
+        // Puan 1–5 arası tam sayı olmalı; yoksa ortalama uydurma bir değerle
+        // bozulabilirdi.
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && shortText(request.resource.data.text, 2000);
+      // Herkes kendi kaydını siler. Yönetici ayrıca başkasınınkini de silebilir —
+      // bir kitap silindiğinde ona bağlı kayıtların da temizlenmesi için gerekli
+      // (yoksa geride sahibi olmayan yorum/alıntı/raf/oy kalır).
+      allow delete: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    // Alıntılar: herkes okuyabilir. Belge id'si otomatik (auto-id) üretilir
+    // çünkü bir kullanıcı bir kitaba birden çok alıntı ekleyebilir.
+    match /quotes/{quoteId} {
+      allow read: if true;
+      allow create: if isMember()
+        && request.resource.data.userId == request.auth.uid
+        && onlyFields(['bookId','userId','text','page','createdAt','likedBy'])
+        && shortText(request.resource.data.text, 2000)
+        && (request.resource.data.page == null
+            || shortText(request.resource.data.page, 20))
+        // Alıntıyı ekleyen "ben de" listesini dolu başlatamaz
+        && request.resource.data.get('likedBy', []) == [];
+      // Herkes kendi kaydını siler. Yönetici ayrıca başkasınınkini de silebilir —
+      // bir kitap silindiğinde ona bağlı kayıtların da temizlenmesi için gerekli
+      // (yoksa geride sahibi olmayan yorum/alıntı/raf/oy kalır).
+      allow delete: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
+
+      // Tek izinli güncelleme: üye kendini "ben de" listesine ekler/çıkarır.
+      // Metne, sayfaya, sahibine dokunamaz. Eski alıntılarda alan hiç
+      // olmadığı için resource tarafında get(...,[]) ile varsayılan veriyoruz.
+      allow update: if isMember()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likedBy'])
+        && request.resource.data.get('likedBy', []).toSet()
+             .difference(resource.data.get('likedBy', []).toSet())
+             .hasOnly([request.auth.uid])
+        && resource.data.get('likedBy', []).toSet()
+             .difference(request.resource.data.get('likedBy', []).toSet())
+             .hasOnly([request.auth.uid]);
+    }
+
+    // Raflar: kim ne okuyor bilgisi üyelere açık. Belge id'si `${uid}__${bookId}`
+    // olduğu için bir kullanıcı bir kitap için tek bir raf durumuna sahip
+    // olabilir — kural bunu id ile data'nın tutarlılığını zorunlu kılarak sağlar.
+    match /shelves/{shelfId} {
+      allow read: if request.auth != null;
+      allow create, update: if isMember()
+        && request.resource.data.userId == request.auth.uid
+        && shelfId == request.auth.uid + "__" + request.resource.data.bookId
+        && onlyFields(['userId','bookId','status','progress','updatedAt'])
+        && request.resource.data.status in ['read','reading','want']
+        // İlerleme yüzdesi: 0–100 arası tam sayı. Serbest bırakılırsa
+        // ilerleme çubukları saçmalar (negatif ya da 10.000'lik değerler).
+        && ( !("progress" in request.resource.data)
+             || ( request.resource.data.progress is int
+                  && request.resource.data.progress >= 0
+                  && request.resource.data.progress <= 100 ) );
+      // Herkes kendi kaydını siler. Yönetici ayrıca başkasınınkini de silebilir —
+      // bir kitap silindiğinde ona bağlı kayıtların da temizlenmesi için gerekli
+      // (yoksa geride sahibi olmayan yorum/alıntı/raf/oy kalır).
+      allow delete: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    // Oylar: sonuç sayımı için üyeler okuyabilir (ziyaretçiye kapalı — belgede
+    // kimin neye oy verdiği yazıyor). Belge id'si `${month}__${uid}` olduğu için
+    // bir kullanıcı bir ay için en fazla bir oy kullanabilir. Oylama kapalıysa
+    // (elections/{month}.status == "closed") yeni oy/güncelleme kabul edilmez.
+    match /votes/{voteId} {
+      allow read: if request.auth != null;
+      allow create, update: if isMember()
+        && request.resource.data.userId == request.auth.uid
+        && voteId == request.resource.data.month + "__" + request.auth.uid
+        && onlyFields(['month','userId','bookId','createdAt'])
+        // Oy sadece gerçekten var olan bir kitaba verilebilir.
+        && exists(/databases/$(database)/documents/books/$(request.resource.data.bookId))
+        && ( !exists(/databases/$(database)/documents/elections/$(request.resource.data.month))
+             || get(/databases/$(database)/documents/elections/$(request.resource.data.month)).data.status == "open" );
+      // Herkes kendi kaydını siler. Yönetici ayrıca başkasınınkini de silebilir —
+      // bir kitap silindiğinde ona bağlı kayıtların da temizlenmesi için gerekli
+      // (yoksa geride sahibi olmayan yorum/alıntı/raf/oy kalır).
+      allow delete: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    // Buluşmaya katılım: kimin geleceği üyeler arası bilgi, ziyaretçiye kapalı
+    // (votes ile aynı gerekçe). Belge id'si `${month}__${uid}` olduğu için bir
+    // üye bir ay için tek kayıt tutar; tekrar işaretleyince günceller.
+    //
+    // Neden ayrı koleksiyon: schedule/{month} yazımı isAdmin() ile sınırlı,
+    // katılım oraya konsaydı üye kendi katılımını yazamazdı.
+    match /katilim/{katilimId} {
+      allow read: if request.auth != null;
+      allow create, update: if isMember()
+        && request.resource.data.userId == request.auth.uid
+        && katilimId == request.resource.data.month + "__" + request.auth.uid
+        && onlyFields(['month','userId','durum','createdAt'])
+        && request.resource.data.durum in ['geliyor','gelemiyor'];
+      // Herkes kendi kaydını siler (fikir değiştirmenin yolu); yönetici de siler.
+      allow delete: if isAdmin()
+        || (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    // Seçim durumu (açık/kapalı + kazanan): herkes okuyabilir, sadece
+    // yönetici yazabilir (kesinleştirme/yeniden açma).
+    match /elections/{month} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Tartışma soruları: herkes okuyabilir (arşivde geçmiş ayların soruları da
+    // görünsün), sadece yönetici yazar.
+    match /questions/{questionId} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && onlyFields(['bookId','text','order','createdAt'])
+        && shortText(request.resource.data.text, 500);
+      allow delete: if isAdmin();
+    }
+
+    // Cevaplar: kulübün iç sohbeti, sadece giriş yapmış üyeler okur.
+    // Belge id'si `${questionId}__${uid}` olduğu için kişi başına soru başına
+    // tek cevap olur — kural bunu id/veri tutarlılığıyla zorluyor.
+    match /answers/{answerId} {
+      allow read: if request.auth != null;
+      allow create, update: if isMember()
+        && request.resource.data.userId == request.auth.uid
+        && answerId == request.resource.data.questionId + "__" + request.auth.uid
+        && onlyFields(['questionId','bookId','userId','text','createdAt','updatedAt'])
+        && shortText(request.resource.data.text, 2000);
+      // Herkes kendi cevabını siler; yönetici soru/kitap silerken bağlı
+      // cevapları temizleyebilsin diye onda da yetki var.
+      allow delete: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid);
+    }
+
+    // Okuma takvimi: herkes okuyabilir, sadece yönetici yazabilir.
+    match /schedule/{month} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Sohbet odası: sitenin geri kalanının aksine ziyaretçiye TAMAMEN kapalı.
+    // Okuma ölçütü isMember() — onaysız bir hesap sohbeti göremez.
+    match /mesajlar/{mesajId} {
+      allow read: if isMember();
+
+      allow create: if isMember()
+        // Başkasının adına mesaj atılamaz.
+        && request.resource.data.uid == request.auth.uid
+        && onlyFields(['uid','metin','createdAt','grupId'])
+        && shortText(request.resource.data.metin, 2000)
+        && request.resource.data.metin.size() > 0
+        && request.resource.data.createdAt is int;
+
+      // Mesaj düzenleme yok — geçmişi kimse değiştiremesin.
+      allow update: if false;
+
+      // Herkes kendi mesajını siler; yönetici herkesinkini silebilir.
+      allow delete: if isAdmin()
+        || (request.auth != null && resource.data.uid == request.auth.uid);
+    }
+  }
+}
