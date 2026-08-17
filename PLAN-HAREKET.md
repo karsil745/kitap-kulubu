@@ -220,28 +220,66 @@ tuzak siteye görseli dışarıdan bağlamaya kalkarsak da geçerli; görsel
 
 ## Adım 3 — Hareket seti
 
-Hepsi **saf CSS + IntersectionObserver**. Framer Motion vb. paket
-**eklenmeyecek** — bu kadarı için bundle şişirmeye değmez.
+Altı aday konuşuldu, **dördü kaldı.** Hepsi **saf CSS + IntersectionObserver**;
+Framer Motion vb. paket **eklenmeyecek** — bu kadarı için bundle şişirmeye
+değmez.
 
-1. **Yavaş yakınlaşma (Velorah'ın tek hareketi).** Hero görseli varsa 20–30
-   saniyelik döngüde çok hafif `scale` (1.00 ↔ 1.06). Görsel yoksa bu madde
-   atlanır — kapak fotoğrafına uygulanmaz, kapak zaten 3B efektli.
-2. **Kademeli giriş.** Sayfa açılınca hero başlığı, açıklama ve buton sırayla
-   (60–80 ms arayla) alttan hafifçe belirir. Tek seferlik, döngü değil.
-3. **Görünürken açılma.** Bölümler ekrana girerken alttan hafif belirir
-   (`IntersectionObserver`, bir kez tetiklenir). "Şimdiye kadar okuduklarımız"
-   şeridinde kapaklar sırayla gelir.
-4. **Sayaç animasyonu.** Kulüp sayacı ("14 kitap · 4.312 sayfa") görünür olunca
-   0'dan hedefe sayar. Kısa (~800 ms), bir kez.
-5. **Kayan şerit (marquee).** Geçmiş kitaplar şeridi çok yavaş kendiliğinden
-   akar, fareyle üzerine gelince veya dokununca durur. *Bu madde en risklisi —
-   yatay kaydırmayla çakışabilir, en sona bırakılmalı ve beğenilmezse geri
-   alınmalı.*
-6. **Sayfa geçişi.** Rota değişince içerik kısa bir belirmeyle gelir.
+### 3a. Kademeli giriş · hero, sayfa ilk açıldığında
 
-**Zorunlu:** `@media (prefers-reduced-motion: reduce)` altında 1, 5 ve 6
-tamamen kapanır; 2, 3, 4 anında son hâline atlar. Hareketi kapatmış kullanıcı
-sitenin hiçbir bilgisini kaybetmemeli.
+Hero metni sırayla alttan belirir: etiket → başlık → yazar → açıklama →
+butonlar.
+
+- Her öge `translateY(12px)` + `opacity: 0`'dan gelir, süre **500 ms**,
+  yumuşama `cubic-bezier(.2, .7, .2, 1)` (projede zaten kullanılan eğri).
+- Ögeler arası gecikme **60 ms**. Toplam ~800 ms; daha uzunu bekletme hissi verir.
+- **Sadece ilk yüklemede**, rota değişiminde değil (o 3d'nin işi).
+- **Kapak (`.hero-cover`) bu animasyona dahil değil** — üzerinde zaten
+  `heroFloat` var, ikisi üst üste binerse kapak zıplıyormuş gibi görünür.
+
+### 3b. Görünürken açılma · yalnızca "Şimdiye kadar okuduklarımız"
+
+Şerit ekrana girince kapaklar sırayla belirir.
+
+- `IntersectionObserver`, eşik 0.2, tetiklendikten sonra **`unobserve`** —
+  yukarı aşağı kaydırdıkça tekrar tekrar oynamamalı.
+- Kapaklar arası **70 ms**, süre **450 ms**.
+- **Sadece bu bölümde.** Her bölüme koyulursa sayfa yorucu olur; sayfayı
+  aşağı inerken sürekli bir şeylerin belirmesi huzursuz eder.
+
+### 3c. Sayaç · kulüp sayacı
+
+"14 kitap · 4.312 sayfa" görünür olunca 0'dan hedefe sayar.
+
+- Süre **800 ms**, `easeOutCubic`, bir kez (3b ile aynı gözlemci).
+- Sayılar `toLocaleString("tr-TR")` ile biçimlenir — binlik ayracı **nokta**
+  olmalı (4.312), virgül değil.
+
+### 3d. Sayfa geçişi · rota değişiminde
+
+İçerik sert belirmek yerine **180 ms**'de `opacity` + 4px yükselerek gelir.
+
+- Kısa tutulmalı. 300 ms üstü gezinmeyi ağır hissettirir; burada amaç fark
+  edilmemek, sadece sertliği almak.
+
+### Elenen ve bekleyen
+
+- **Kayan şerit (marquee) — ELENDİ.** Kulüp şeridi zaten elle yatay kaydırılıyor;
+  kendiliğinden akan bir şeyi okumaya çalışmak sinir bozucu ve dokunmatikte
+  kaydırmayla kavga ediyor.
+- **Yavaş yakınlaşma (hero tablosunda `scale`) — KARAR BEKLİYOR.** Kapakta
+  zaten `heroFloat 6.5s` çalışıyor. Arka planda da sürekli bir hareket olursa
+  hero'da iki ayrı ritim olur. **İkisinden biri seçilmeli:** ya kapak süzülür
+  ya tablo yakınlaşır. Karar verilmeden yapılmamalı.
+
+### Hepsi için zorunlu kurallar
+
+- **`prefers-reduced-motion: reduce`** altında 3d tamamen kapanır; 3a, 3b, 3c
+  anında son hâline atlar. Hareketi kapatmış kullanıcı hiçbir bilgi kaybetmez.
+- **Başlangıç durumu CSS'te `opacity: 0` OLMAYACAK.** Gizleyen sınıf JS ile
+  eklenmeli; aksi halde JS bir sebeple çalışmazsa (hata, eski tarayıcı) içerik
+  kalıcı olarak görünmez kalır. Varsayılan hep "görünür" olmalı.
+- Animasyonlar `transform` ve `opacity` ile sınırlı — `top`, `height`, `margin`
+  gibi yerleşim tetikleyen özellikler kullanılmayacak.
 
 ## Yapılmayacaklar
 
@@ -273,6 +311,10 @@ Velorah'a bakarken çekici gelebilir ama bu siteye zarar verir:
 - [ ] Görselin kenarında keskin geçiş yok
 - [ ] Görseli değiştirmek gerçekten tek dosya değişimi mi (kod elleme yok)
 - [ ] Opaklık CSS değişkeninde mi, iki tema için ayrı mı tanımlı
+- [ ] JS kapalıyken/hata verdiğinde hiçbir içerik görünmez kalmıyor
+- [ ] Görünürken açılma bir kez oynuyor, tekrar kaydırınca tekrarlamıyor
+- [ ] Sayaçta binlik ayracı nokta (4.312)
+- [ ] `prefers-reduced-motion` açıkken hepsi duruyor, içerik tam
 - [ ] Klavyeyle gezinirken görünürken-açılan bölümler odağı kaçırmıyor
 - [ ] Deploy: `kitap-kulubu` klasörünün içinde
       `vercel --prod --token=<TOKEN> --yes`
@@ -296,3 +338,12 @@ Velorah'a bakarken çekici gelebilir ama bu siteye zarar verir:
   sayfasında %45 opaklık / %30 sepya belirledi. Kontrast ölçümü açık temada
   geçtiğini (4.83) ama **koyu temada kaldığını (4.30)** gösterdi → koyu tema
   için **%40** (4.97). Tema başına ayrı opaklık kuralı böylece sayıya bağlandı.
+- **2026-08-16:** Adım 2 **uygulandı**. Ara not: bir teknik oturum önce planın
+  tersini yapmıştı (uydurma `hero-gece.svg` + elenen koyu band + açık renk
+  yazı); geri alındı. Doğru sürüm hero **kartının içine** `::before` katmanı
+  olarak girdi — site bu arada kart diline geçtiği için tablo artık kâğıdın
+  değil kartın zemini. Gerçek sayfada ölçülen kontrast: açık **5.23**, koyu
+  **4.68** (koyuda %45 denenseydi 4.09 ile kalıyordu).
+- **2026-08-16:** Adım 3 ayrıntılandırıldı: dört madde kaldı (kademeli giriş,
+  görünürken açılma, sayaç, sayfa geçişi). **Kayan şerit elendi.** Yavaş
+  yakınlaşma `heroFloat` ile çakıştığı için karar bekliyor.
