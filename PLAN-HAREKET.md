@@ -233,7 +233,13 @@ tuzak siteye görseli dışarıdan bağlamaya kalkarsak da geçerli; görsel
 - Görsel yüklenemezse hero **bozulmamalı** — arkası sade kâğıt kalır, metin
   yerinde durur.
 
-## Adım 3 — Hareket seti
+## Adım 3 — Hareket seti · ➡️ AYRI DOSYAYA TAŞINDI
+
+> **Uygulanacak sürüm: `PLAN-ANIMASYON.md`** (2026-08-16'da ayrıldı, kendi
+> başına yeterli). Teknik iş oradan yapılır. Aşağısı aynı içeriğin kaynağı;
+> ikisi çelişirse `PLAN-ANIMASYON.md` geçerlidir.
+
+### Özet (ayrıntı ayrı dosyada)
 
 Altı aday konuşuldu, **dördü kaldı.** Hepsi **saf CSS + IntersectionObserver**;
 Framer Motion vb. paket **eklenmeyecek** — bu kadarı için bundle şişirmeye
