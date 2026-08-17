@@ -85,7 +85,22 @@ adıyla dilbilgisel olarak doğrudur.
 **Neden önce bu:** en yüksek kazanç/risk oranına sahip madde. Tek başına deploy
 edilip bakılmalı; sonucu görülmeden Adım 2 ve 3'e geçilmemeli.
 
-## Adım 2 — Hero arkasına soluk tablo
+## Adım 2 — Hero arkasına soluk tablo · ❌ DENENDİ VE VAZGEÇİLDİ
+
+> **2026-08-16: Bu adım uygulandı, canlıda görüldü ve kullanıcı isteğiyle
+> tamamen geri alındı.** Aşağısı arşiv amaçlı duruyor — tekrar denenecekse
+> hangi kararların nasıl alındığı burada. Yeniden yapılmadan önce mutlaka
+> konuşulmalı.
+>
+> Gerekçe: teknik bir sorun değildi. Kontrast ölçümleri geçiyordu (açık 5.23,
+> koyu 4.68), tablo doğru seçilmişti, yerleşim çalışıyordu. Kullanıcı sadece
+> **hero'nun arkasında fotoğraf olması fikrini** beğenmedi. Kutu, çerçeve ve
+> ayraç sevmemesiyle tutarlı bir tercih.
+>
+> Uygulama `public/hero-arkaplan.webp` + `.hero::before` katmanı +
+> `--hero-tablo-opaklik` değişkeniydi; hepsi geri alındı, kalıntı yok.
+
+
 
 > Adım 1 canlıda görüldükten sonra yapılır. Tek bir dosya + birkaç satır CSS.
 
@@ -263,13 +278,19 @@ butonlar.
 
 ### Elenen ve bekleyen
 
-- **Kayan şerit (marquee) — ELENDİ.** Kulüp şeridi zaten elle yatay kaydırılıyor;
-  kendiliğinden akan bir şeyi okumaya çalışmak sinir bozucu ve dokunmatikte
-  kaydırmayla kavga ediyor.
-- **Yavaş yakınlaşma (hero tablosunda `scale`) — KARAR BEKLİYOR.** Kapakta
-  zaten `heroFloat 6.5s` çalışıyor. Arka planda da sürekli bir hareket olursa
-  hero'da iki ayrı ritim olur. **İkisinden biri seçilmeli:** ya kapak süzülür
-  ya tablo yakınlaşır. Karar verilmeden yapılmamalı.
+- **Kayan şerit (marquee) — ELENDİ (2026-08-16, kesin).** Kulüp şeridi zaten
+  elle yatay kaydırılıyor; kendiliğinden akan bir şeyi okumaya çalışmak sinir
+  bozucu ve dokunmatikte kaydırmayla kavga ediyor. Kodda hiç yazılmadı.
+- **Yavaş yakınlaşma — KONUSUZ KALDI.** Uygulanacağı arka plan görseli
+  (Adım 2) geri alındığı için ortada yakınlaşacak bir şey yok.
+- **Kapak süzülmesi (`heroFloat`) — KALDIRILDI (2026-08-16).** Kullanıcı
+  isteğiyle silindi: sürekli oynayan bir öge hero'ya ikinci bir ritim
+  katıyordu. Kapakta hareket artık yalnızca hover'da. Keyframes ve ölü
+  `prefers-reduced-motion` kuralı da temizlendi.
+
+**Sonuç: kalıcı (durmadan tekrar eden) hiçbir animasyon kalmadı.** Adım 3'teki
+dört maddenin hepsi ya bir kez oynuyor ya da kullanıcı hareketine cevap
+veriyor. Yeni bir sürekli animasyon önerilirse bu karara dönülmeli.
 
 ### Hepsi için zorunlu kurallar
 
@@ -345,5 +366,9 @@ Velorah'a bakarken çekici gelebilir ama bu siteye zarar verir:
   değil kartın zemini. Gerçek sayfada ölçülen kontrast: açık **5.23**, koyu
   **4.68** (koyuda %45 denenseydi 4.09 ile kalıyordu).
 - **2026-08-16:** Adım 3 ayrıntılandırıldı: dört madde kaldı (kademeli giriş,
-  görünürken açılma, sayaç, sayfa geçişi). **Kayan şerit elendi.** Yavaş
-  yakınlaşma `heroFloat` ile çakıştığı için karar bekliyor.
+  görünürken açılma, sayaç, sayfa geçişi). **Kayan şerit elendi.**
+- **2026-08-16 (aynı gün, kullanıcı canlıda gördükten sonra):** **Adım 2 geri
+  alındı** — arka planda fotoğraf fikri beğenilmedi. **Kapak süzülmesi
+  kaldırıldı.** Kayan şerit kesin olarak elendi. Böylece sitede sürekli tekrar
+  eden animasyon kalmadı. Hero'ya görsel katma fikri kapanmadı ama farklı bir
+  yönden düşünülecek — bu dosyada değil, yeni bir konuşmada.
