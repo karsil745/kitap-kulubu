@@ -39,11 +39,6 @@
   --radius-lg: 14px; /* kart, panel */
   --radius-pill: 999px; /* sadece gerçekten hap olması gereken yerler */
 
-  /* Hero kartının içindeki tablonun görünürlüğü (PLAN-HAREKET Adım 2).
-     Göze göre değil ölçülerek seçildi: metin bölgesindeki en kötü kontrast
-     bu değerde 4.83 (WCAG AA sınırı 4.5). %50'de 4.10'a düşüp kalıyordu. */
-  --hero-tablo-opaklik: 0.45;
-
   --canvas: 1180px; /* sayfa tuvali */
 
   /* Başlık ölçeği — ekranla birlikte büyür */
@@ -59,9 +54,6 @@
 
 /* Koyu tema */
 :root[data-theme="dark"] {
-  /* Koyu kartta aynı opaklık kontrastı 4.30'a düşürüyor (kalır). %40'ta 4.97. */
-  --hero-tablo-opaklik: 0.4;
-
   --bg: #191614; /* koyu kahve-siyah zemin */
   --surface: #221e1b; /* kartlar bir ton açık */
   --surface-2: #2a2522;
