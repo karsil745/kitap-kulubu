@@ -2044,6 +2044,50 @@ textarea {
   min-height: 0;
   margin-top: 1.2rem;
   gap: clamp(1.5rem, 4vw, 3.2rem);
+  /* Tablo katmanı için konumlandırma çerçevesi (PLAN-HAREKET Adım 2) */
+  position: relative;
+}
+
+/* ---- Hero kartının içindeki tablo (PLAN-HAREKET Adım 2) ----
+   Corot, "Landscape" (1865/70) — Art Institute of Chicago, CC0 kamu malı.
+   https://www.artic.edu/artworks/877
+
+   Tablo metnin ARKASINA geçer, yerine değil: bu ayın kitabı, kapağı, yazarı ve
+   buluşma bilgisi olduğu gibi kalır. Kartın kendi zemini görünmeye devam ettiği
+   için yazı koyu mürekkep kalıyor — açık renge çevirmiyoruz, o elenen "koyu
+   band" seçeneğine dönmek olurdu.
+
+   Tabloyu değiştirmek için: aynı adla başka bir dosya koy, kod değişmez.
+   Şiddetini değiştirmek için: index.css'teki --hero-tablo-opaklik. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit; /* kartın köşelerini taşırmasın (overflow gerekmez:
+                             kapağın süzülen gölgesi kırpılmamalı) */
+  background-image: url("/hero-arkaplan.webp");
+  background-size: cover;
+  background-position: center 58%;
+  opacity: var(--hero-tablo-opaklik);
+  /* Tablonun gümüşi yeşilini kâğıdın sıcaklığına çeker */
+  filter: sepia(0.3);
+  /* Aşağı doğru sönerek kartın zeminine karışır — keskin kenar bırakmıyoruz.
+     Bu projede kapak arkasındaki bordo parıltı tam da keskin geçiş yüzünden
+     kaldırılmıştı. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 52%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+  pointer-events: none;
+}
+/* İçerik tablonun üstünde kalsın */
+.hero > * {
+  position: relative;
+  z-index: 1;
 }
 /* Kart içinde ekran dolusu başlık gerekmiyor; yine de serif ölçeğinde iri */
 /* Hero tipografisi — koyuluk merdiveni (PLAN-HAREKET Adım 1):
