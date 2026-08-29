@@ -3,7 +3,13 @@
 > Planlama notu, kod değil. Teknik sohbette:
 > "kitap-kulubu/PLAN-HAREKET.md dosyasını oku ve X. adımı uygula."
 >
-> Son güncelleme: 2026-08-15 · Diğer planlardan bağımsız.
+> Son güncelleme: 2026-08-29 · Diğer planlardan bağımsız.
+>
+> **Durum: kapandı — bekleyen iş yok.** Adım 1 (hero tipografisi) uygulandı,
+> Adım 2 (arka plan tablosu) denendi ve geri alındı, Adım 3 (hareket seti)
+> `PLAN-ANIMASYON.md`'ye taşınıp orada uygulandı. Dosya karar günlüğü olarak
+> duruyor: hero'ya yeniden görsel katma fikri açılırsa neyin neden elendiği
+> burada yazılı.
 
 ## Nereden çıktı
 

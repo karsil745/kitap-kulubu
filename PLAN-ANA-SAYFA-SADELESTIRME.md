@@ -1,7 +1,9 @@
 # PLAN — Ana sayfayı sadeleştirme
 
 **Karar tarihi:** 2026-08-15
-**Durum:** planlandı, kod yazılmadı
+**Durum:** Adım 2, 4 ve 5 **uygulandı** (2026-08-29). Adım 1 ve 3 (hero'nun ilk
+perdeyi tek başına alması, şeridin künye gibi tek satıra inmesi) hâlâ bekliyor —
+ikisi de görerek karar verilecek CSS işi.
 **İlgili:** [PLAN-ANA-SAYFA-KULUP-SERIDI.md](PLAN-ANA-SAYFA-KULUP-SERIDI.md) (şeridi ekleyen plan — geri alınmıyor, küçültülüyor)
 
 ## Sorun
@@ -40,7 +42,7 @@ kitabını ve buluşmayı görsün.
 - Ziyaretçiye görünen "Kulübe katıl" bandı hero'nun **içine** girsin, ayrı bir
   şerit olarak ikinci bir bölüm gibi durmasın.
 
-### Adım 2 — "En çok önerilenler" kaldırılsın ✅ onaylandı (2026-08-15)
+### Adım 2 — "En çok önerilenler" kaldırılsın ✅ UYGULANDI (2026-08-29)
 Üç kitap kartı yer kaplıyor ve `/kitaplar` sayfasının kopyası. Hero'daki
 "Kitap öner →" bağlantısı aynı yere zaten götürüyor. Bölüm tamamen silinir,
 `BookCard` importu ve `popular` hesabı `HomePage`'ten çıkar.
@@ -54,14 +56,22 @@ gibi değil **künye gibi** dursun:
 - Ay etiketleri (TEMMUZ 2026, HAZİRAN 2026 …) ayrı satırlarda dökülmesin;
   yatay kaydırılan tek şerit olsun.
 
-### Adım 4 — Aktivite akışı ana sayfadan çıksın ✅ onaylandı (2026-08-15)
+### Adım 4 — Aktivite akışı ana sayfadan çıksın ✅ UYGULANDI (2026-08-29)
 `<ActivityFeed />` `HomePage`'ten kaldırılır. Bileşen **silinmez**, yeni evine
 taşınır (Adım 5).
 
 Geriye Günün Sözü kalır ve sayfanın kapanışı olur — tek başına, sessiz, küçük
 punto. Bölüm başlığı bile gerekmeyebilir.
 
-### Adım 5 — Akışın yeni evi: `/sohbet` zaman çizgisi
+> **Uygulama notu (2026-08-29):** Adım 5 akışı sohbetin içine satır satır
+> yerleştirdiği için `ActivityFeed.tsx` bileşenine çağıran kalmadı ve **dosya
+> silindi** — planın "bileşen silinmez" cümlesi, akış kaybolmasın diye
+> yazılmıştı; akış yeni evinde duruyor. Satır metnini üreten `eylem()` işlevi
+> kaybolmadı, `useActivity.ts` içine `hareketMetni` adıyla taşındı. Bileşene ait
+> `.activity-*` CSS'i de temizlendi. Muhafazakâr alternatife (sohbette sağ sütun)
+> dönülecekse eski bileşen git geçmişinde duruyor.
+
+### Adım 5 — Akışın yeni evi: `/sohbet` zaman çizgisi ✅ UYGULANDI (2026-08-29)
 Ayrı bir kutu ya da yan sütun değil: akış olayları **sohbet akışının içine**,
 kendi zaman sıralarına girer. Sohbetin metaforu tutanak; tutanak konuşulanı da
 olanı da yazar.

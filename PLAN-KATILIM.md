@@ -1,7 +1,11 @@
 # PLAN — Buluşmaya katılım işareti
 
 **Karar tarihi:** 2026-08-15
-**Durum:** planlandı, kod yazılmadı
+**Durum:** **uygulandı** — dört adımın dördü de kodda (2026-08-29'da doğrulandı).
+Kural `firestore.rules` içinde `match /katilim/{katilimId}`, hook
+[useKatilim.ts](src/hooks/useKatilim.ts), arayüz [Meeting.tsx](src/components/Meeting.tsx),
+ana sayfa satırı [HomePage.tsx](src/pages/HomePage.tsx). Aşağısı kararların
+gerekçesi olarak duruyor.
 
 ## Ne çözüyor
 

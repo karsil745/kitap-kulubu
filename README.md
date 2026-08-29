@@ -66,7 +66,7 @@ tartışmaktan kurtarır.
 | `PLAN-ANA-SAYFA-KULUP-SERIDI.md` | uygulandı |
 | `PLAN-SOHBET-ODASI.md` | uygulandı, testleri bekliyor |
 | `PLAN-ANIMASYON.md` | uygulandı, testleri bekliyor |
-| `PLAN-HAREKET.md` | kısmen uygulandı |
-| `PLAN-ANA-SAYFA-SADELESTIRME.md` | planlandı |
-| `PLAN-KATILIM.md` | planlandı |
+| `PLAN-KATILIM.md` | uygulandı |
+| `PLAN-HAREKET.md` | kapandı — Adım 1 uygulandı, Adım 2 geri alındı, Adım 3 `PLAN-ANIMASYON.md`'ye taşındı |
+| `PLAN-ANA-SAYFA-SADELESTIRME.md` | Adım 2·4·5 uygulandı; Adım 1 ve 3 bekliyor |
 | `PLAN-ODALAR.md` | taslak |
