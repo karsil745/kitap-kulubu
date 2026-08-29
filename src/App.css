@@ -1041,58 +1041,6 @@ textarea {
   font-size: 0.92rem;
 }
 
-/* ---- Kulüp akışı (ActivityFeed) ---- */
-/* Kutusuz, çizgisiz: her satır kim · ne yaptı · hangi kitap · ne zaman. */
-.activity {
-  margin-top: 3rem;
-}
-.activity-rows {
-  list-style: none;
-  padding: 0;
-  margin: 0.6rem 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-}
-.activity-row {
-  display: flex;
-  align-items: baseline;
-  gap: 0.55rem;
-  flex-wrap: wrap;
-  font-size: 0.95rem;
-}
-.activity-who {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-weight: 600;
-  color: var(--ink);
-}
-.activity-verb {
-  color: var(--muted);
-}
-.activity-book {
-  color: var(--accent);
-  font-family: var(--font-display);
-  font-size: 1.02rem;
-}
-.activity-book:hover {
-  text-decoration: none;
-  color: var(--accent-strong);
-}
-/* Zaman en sağa itilir; dar ekranda alta düşmesin diye küçük kalır */
-.activity-time {
-  margin-left: auto;
-  color: var(--muted);
-  font-size: 0.82rem;
-  white-space: nowrap;
-}
-@media (max-width: 640px) {
-  .activity-time {
-    margin-left: 0;
-  }
-}
-
 /* ---- Okuma ilerlemesi ---- */
 /* Kendi yüzdeni ayarladığın kaydırıcı ("Okuyorum" seçiliyken çıkar) */
 .progress-input {
@@ -1788,6 +1736,29 @@ textarea {
   margin-top: 0.2rem;
 }
 
+/* Kulüpte olan bitenler sohbetin içinde bir sahne notu gibi durur: zeminsiz,
+   çerçevesiz, avatarsız, italik. Konuşulanla karışmasın diye soluk. */
+.chat-hareket {
+  margin: 0.9rem 0;
+  padding-left: 2.1rem;
+  font-size: 0.88rem;
+  font-style: italic;
+  color: var(--muted);
+}
+.chat-hareket a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 2px;
+}
+.chat-hareket a:hover {
+  color: var(--ink-2);
+}
+.chat-hareket-ozet {
+  color: var(--ink-3);
+  opacity: 0.75;
+}
+
 /* Metin avatarın sağ kenarıyla hizalanır; künye satırı sola taşar */
 .chat-satir {
   padding-left: 2.1rem;
@@ -2137,26 +2108,6 @@ textarea {
 }
 .gecmis-ay {
   padding-left: 0.1rem;
-}
-
-/* Akış: satırlar tek bir kartın içinde, aralarında ince ayraç */
-.activity-rows {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  padding: 0.2rem 1.2rem;
-  gap: 0;
-}
-.activity-row {
-  padding: 0.8rem 0;
-  border-bottom: 1px solid var(--line);
-}
-.activity-row:last-child {
-  border-bottom: none;
-}
-/* Akıştaki kitap adı serif kalıyor — satırın içinde kitabı o ayırıyor */
-.activity-book {
-  font-size: 1.02rem;
 }
 
 /* Günün sözü de bir kart; üstündeki kural çizgisi kalkıyor */

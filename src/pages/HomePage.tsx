@@ -7,8 +7,6 @@ import { useKatilim } from "../hooks/useKatilim";
 import { currentMonth, monthLabel } from "../lib/month";
 import { gercekAciklama } from "../lib/text";
 import { bulusmaEtiketi } from "../lib/time";
-import ActivityFeed from "../components/ActivityFeed";
-import BookCard from "../components/BookCard";
 import Cover from "../components/Cover";
 import QuoteOfTheDay from "../components/QuoteOfTheDay";
 import ReadingHistory from "../components/ReadingHistory";
@@ -17,7 +15,10 @@ import ReadingHistory from "../components/ReadingHistory";
 // ana sayfaya her dönüşte bileşen yeniden kurulur, bu bayrak kurulmaz.
 let heroGirisiOynadi = false;
 
-// Ana sayfa: Ayın Kitabı vurgusu + en çok önerilen kitaplar.
+// Ana sayfanın tek bir işi var: bu ay ne okuyoruz, ne zaman buluşuyoruz.
+// "En çok önerilenler" (/kitaplar'ın kopyasıydı) ve "Kulüpte neler oluyor"
+// (artık sohbet akışının içinde) buradan kaldırıldı; bkz.
+// PLAN-ANA-SAYFA-SADELESTIRME.md Adım 2, 4 ve 5.
 export default function HomePage() {
   const { books, authors, currentUser } = useApp();
   const { current } = useSchedule();
@@ -42,11 +43,6 @@ export default function HomePage() {
   // Oylama sürerken hero'da şu an önde giden adayın kapağını gösteririz.
   const leader = leaderId ? books.find((b) => b.id === leaderId) ?? null : null;
   const heroBook = botm ?? leader;
-
-  // En çok öneri alan 3 kitap
-  const popular = [...books]
-    .sort((a, b) => b.recommendedBy.length - a.recommendedBy.length)
-    .slice(0, 3);
 
   return (
     <div>
@@ -132,25 +128,9 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Kulübün geçmişi popüler kitaplardan önce gelir — sayfanın hikâyesi
-          "bu ay ne okuyoruz → bugüne kadar neler okuduk" diye kuruluyor. */}
+      {/* Sayfanın hikâyesi: "bu ay ne okuyoruz → bugüne kadar neler okuduk"
+          → sessiz kapanış. */}
       <ReadingHistory />
-
-      <section className="section">
-        <div className="section-head">
-          <h2>En çok önerilenler</h2>
-          <Link to="/kitaplar" className="link-more">
-            Tümü →
-          </Link>
-        </div>
-        <div className="book-grid">
-          {popular.map((b, i) => (
-            <BookCard key={b.id} book={b} index={i + 1} />
-          ))}
-        </div>
-      </section>
-
-      <ActivityFeed />
 
       <QuoteOfTheDay />
     </div>

@@ -3,21 +3,49 @@ import type { FormEvent, KeyboardEvent } from "react";
 import { Link } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { useMessages } from "../hooks/useMessages";
+import { useActivity, hareketMetni } from "../hooks/useActivity";
+import type { Activity } from "../hooks/useActivity";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { ayniGun, gunEtiketi, saatEtiketi } from "../lib/time";
 import Avatar from "../components/Avatar";
+import type { Message } from "../types";
 
 // Aynı kişinin peş peşe mesajları tek blok sayılır; arada bu kadar zaman
 // geçmişse blok yeniden başlar (yoksa sabah 9'daki mesajla akşamki aynı
 // künyenin altında görünür).
 const BLOK_ARASI = 30 * 60_000;
 
+// Akıştan kaç hareket çekilsin ve peş peşe kaç tanesi gösterilsin.
+// Sessiz bir günde hareketler sohbeti boğmasın diye fazlası tek satıra katlanır.
+const HAREKET_SAYISI = 40;
+const ARKA_ARKAYA_HAREKET = 3;
+
+// Zaman çizgisindeki tek bir satır: ya bir mesaj, ya bir hareket, ya da
+// katlanmış hareketleri özetleyen satır.
+type Satir =
+  | {
+      tur: "mesaj";
+      key: string;
+      yeniGun: boolean;
+      at: number;
+      blokBasi: boolean;
+      mesaj: Message;
+    }
+  | { tur: "hareket"; key: string; yeniGun: boolean; at: number; hareket: Activity }
+  | { tur: "ozet"; key: string; yeniGun: boolean; at: number; adet: number };
+
 // Sohbet odası: sadece onaylı üyeler görür ve yazar.
 // Tasarım notu: baloncuk (bubble) yok — baloncuk kutudur, sitenin dili kutusuz.
 // Yerine söyleşi/tutanak düzeni: künye satırı + akan metin.
+//
+// Kulüpte olan bitenler (puan, alıntı, okuma, yeni öneri) ayrı bir kutu ya da
+// yan sütun değil, sohbetin İÇİNE kendi zaman sıralarına giriyor: sohbetin
+// metaforu tutanak, tutanak konuşulanı da olanı da yazar. Yeni veri yok —
+// akış zaten mevcut koleksiyonlardan türetiliyor (bkz. useActivity).
 export default function ChatPage() {
-  const { currentUser, users, isMember, isAdmin } = useApp();
+  const { currentUser, users, books, isMember, isAdmin } = useApp();
   const { mesajlar, gonder, sil, yukleniyor } = useMessages();
+  const hareketler = useActivity(HAREKET_SAYISI);
   const [taslak, setTaslak] = useState("");
   const [gonderiliyor, setGonderiliyor] = useState(false);
   usePageTitle("Sohbet");
@@ -27,21 +55,87 @@ export default function ChatPage() {
   // yerinden oynatmıyoruz.
   const altta = useRef(true);
 
-  // Her mesaj için: yeni gün mü başlıyor, künye (ad/avatar) tekrar yazılacak mı.
-  const satirlar = useMemo(
-    () =>
-      mesajlar.map((mesaj, i) => {
-        const onceki = i > 0 ? mesajlar[i - 1] : null;
-        const yeniGun = !onceki || !ayniGun(onceki.createdAt, mesaj.createdAt);
+  // Mesajlar ve hareketler tek listede, zamana göre eskiden yeniye.
+  // Her satır için: yeni gün mü başlıyor, künye (ad/avatar) tekrar yazılacak mı.
+  const satirlar = useMemo(() => {
+    const ogeler: ({ at: number } & (
+      | { mesaj: Message; hareket?: undefined }
+      | { hareket: Activity; mesaj?: undefined }
+    ))[] = [
+      ...mesajlar.map((mesaj) => ({ at: mesaj.createdAt, mesaj })),
+      ...hareketler.map((hareket) => ({ at: hareket.at, hareket })),
+    ];
+    ogeler.sort((a, b) => a.at - b.at);
+
+    const out: Satir[] = [];
+    let sonAt: number | null = null;
+    let sonMesaj: Message | null = null;
+    // Araya hareket satırı giren iki mesaj artık aynı blok sayılmaz; künye
+    // yeniden yazılır, yoksa satırlar bir başkasının söylediği gibi görünür.
+    let araBozuldu = false;
+
+    const yeniGunMu = (at: number) => sonAt === null || !ayniGun(sonAt, at);
+
+    let i = 0;
+    while (i < ogeler.length) {
+      const oge = ogeler[i];
+
+      if (oge.mesaj) {
+        const yeniGun = yeniGunMu(oge.at);
         const blokBasi =
           yeniGun ||
-          !onceki ||
-          onceki.uid !== mesaj.uid ||
-          mesaj.createdAt - onceki.createdAt > BLOK_ARASI;
-        return { mesaj, yeniGun, blokBasi };
-      }),
-    [mesajlar]
-  );
+          araBozuldu ||
+          !sonMesaj ||
+          sonMesaj.uid !== oge.mesaj.uid ||
+          oge.at - sonMesaj.createdAt > BLOK_ARASI;
+        out.push({
+          tur: "mesaj",
+          key: oge.mesaj.id,
+          yeniGun,
+          at: oge.at,
+          blokBasi,
+          mesaj: oge.mesaj,
+        });
+        sonMesaj = oge.mesaj;
+        sonAt = oge.at;
+        araBozuldu = false;
+        i++;
+        continue;
+      }
+
+      // Peş peşe gelen hareketler: ilk üçü yazılır, kalanı tek satıra katlanır.
+      let j = i;
+      while (j < ogeler.length && ogeler[j].hareket) j++;
+      const seri = ogeler.slice(i, j);
+
+      for (const h of seri.slice(0, ARKA_ARKAYA_HAREKET)) {
+        const yeniGun = yeniGunMu(h.at);
+        out.push({
+          tur: "hareket",
+          key: h.hareket!.id,
+          yeniGun,
+          at: h.at,
+          hareket: h.hareket!,
+        });
+        sonAt = h.at;
+      }
+      if (seri.length > ARKA_ARKAYA_HAREKET) {
+        const son = seri[seri.length - 1];
+        out.push({
+          tur: "ozet",
+          key: `ozet-${son.hareket!.id}`,
+          yeniGun: yeniGunMu(son.at),
+          at: son.at,
+          adet: seri.length - ARKA_ARKAYA_HAREKET,
+        });
+        sonAt = son.at;
+      }
+      araBozuldu = true;
+      i = j;
+    }
+
+    return out;
+  }, [mesajlar, hareketler]);
 
   // Açılışta ve yeni mesajda en alta in — ama sadece kullanıcı zaten alttaysa.
   useLayoutEffect(() => {
@@ -117,12 +211,52 @@ export default function ChatPage() {
           <p className="empty">Henüz kimse bir şey yazmamış. İlk sözü sen söyle.</p>
         )}
 
-        {satirlar.map(({ mesaj, yeniGun, blokBasi }) => {
+        {satirlar.map((satir) => {
+          const gun = satir.yeniGun && (
+            <div className="chat-gun">{gunEtiketi(satir.at)}</div>
+          );
+
+          // Katlanmış hareketler: sessiz bir gün sohbeti doldurmasın.
+          if (satir.tur === "ozet") {
+            return (
+              <Fragment key={satir.key}>
+                {gun}
+                <p className="chat-hareket chat-hareket-ozet">
+                  … ve {satir.adet} hareket daha
+                </p>
+              </Fragment>
+            );
+          }
+
+          // Hareket satırı bir sahne notu: avatarsız, künyesiz, tek satır.
+          if (satir.tur === "hareket") {
+            const a = satir.hareket;
+            const kisi = users.find((u) => u.id === a.userId);
+            const kitap = books.find((b) => b.id === a.bookId);
+            const ad = a.userId === currentUser?.id ? "Sen" : kisi?.name ?? "Üye";
+            return (
+              <Fragment key={satir.key}>
+                {gun}
+                <p className="chat-hareket">
+                  {ad} {hareketMetni(a, kitap?.pages)}
+                  {/* Birleştirilmiş satırda tek bir kitap adı yanıltıcı olur */}
+                  {kitap && !(a.count && a.count > 1) && (
+                    <>
+                      {" · "}
+                      <Link to={`/kitap/${kitap.id}`}>{kitap.title}</Link>
+                    </>
+                  )}
+                </p>
+              </Fragment>
+            );
+          }
+
+          const { mesaj, blokBasi } = satir;
           const yazar = users.find((u) => u.id === mesaj.uid);
           const benim = currentUser?.id === mesaj.uid;
           return (
-            <Fragment key={mesaj.id}>
-              {yeniGun && <div className="chat-gun">{gunEtiketi(mesaj.createdAt)}</div>}
+            <Fragment key={satir.key}>
+              {gun}
               <div className={blokBasi ? "chat-satir blok-basi" : "chat-satir"}>
                 {blokBasi && (
                   <div className="chat-kunye">

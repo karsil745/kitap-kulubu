@@ -19,6 +19,29 @@ export interface Activity {
   count?: number;
 }
 
+// Eylemi kısa bir ifadeyle anlatır. Kitap adı ayrı bir öge olarak
+// gösterildiği için Türkçe ek almasına gerek kalmıyor ("1984'ı" gibi
+// yanlış çekimlerden böyle kaçınıyoruz).
+export function hareketMetni(a: Activity, sayfa?: number): string {
+  switch (a.kind) {
+    case "review":
+      return `★${a.value} verdi`;
+    case "quote":
+      return "alıntı ekledi";
+    case "finished":
+      return "bitirdi";
+    case "reading":
+      if (!a.value) return "okumaya başladı";
+      return sayfa
+        ? `okuyor · s. ${Math.round((a.value / 100) * sayfa)}`
+        : `okuyor · %${a.value}`;
+    case "added":
+      return a.count && a.count > 1 ? `${a.count} kitap önerdi` : "önerdi";
+    default:
+      return "";
+  }
+}
+
 export function useActivity(limit = 12) {
   const { reviews, books, currentUser } = useApp();
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -106,7 +129,13 @@ export function useActivity(limit = 12) {
       });
     }
 
-    const sirali = events.sort((a, b) => b.at - a.at);
+    // Silinmiş kitaba ait kayıtları BURADA eliyoruz, gösterirken değil:
+    // kırpma önce yapılıp satırlar sonra düşürülünce akış sessizce kısalıyor,
+    // hepsi düşerse geriye başlığı olan boş bir liste kalıyordu.
+    const kitapVar = new Set(books.map((b) => b.id));
+    const sirali = events
+      .filter((e) => kitapVar.has(e.bookId))
+      .sort((a, b) => b.at - a.at);
 
     // Aynı kişinin arka arkaya eklediği kitapları tek satırda topla
     // ("Sıla 4 kitap önerdi"). Tek oturumda birkaç kitap eklemek normal;
