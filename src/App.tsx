@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { useApp } from "./context/AppContext";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
@@ -29,11 +29,16 @@ function PendingApprovalBanner() {
 
 // Uygulamanın ana çatısı: üst menü + hangi adreste hangi sayfanın gösterileceği.
 export default function App() {
+  // Rota değişince içerik sertçe yerine geçmesin diye kısa bir beliriş.
+  // `key` olarak yol kullanılıyor: her geçişte animasyon yeniden başlar.
+  const { pathname } = useLocation();
+
   return (
     <div className="app">
       <Navbar />
       <main className="container">
         <PendingApprovalBanner />
+        <div className="rota-gecis" key={pathname}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/kitaplar" element={<BooksPage />} />
@@ -45,6 +50,7 @@ export default function App() {
           <Route path="/takvim" element={<CalendarPage />} />
           <Route path="/sohbet" element={<ChatPage />} />
         </Routes>
+        </div>
       </main>
       <footer className="footer">
         Bibliyofili Kitap Kulübü · arkadaşlarla okuma keyfi

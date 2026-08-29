@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { useSchedule } from "../hooks/useSchedule";
@@ -12,6 +13,10 @@ import Cover from "../components/Cover";
 import QuoteOfTheDay from "../components/QuoteOfTheDay";
 import ReadingHistory from "../components/ReadingHistory";
 
+// Hero giriş animasyonu oturumda BİR KEZ oynar. Modül düzeyinde tutuluyor:
+// ana sayfaya her dönüşte bileşen yeniden kurulur, bu bayrak kurulmaz.
+let heroGirisiOynadi = false;
+
 // Ana sayfa: Ayın Kitabı vurgusu + en çok önerilen kitaplar.
 export default function HomePage() {
   const { books, authors, currentUser } = useApp();
@@ -19,6 +24,14 @@ export default function HomePage() {
   const month = currentMonth();
   const { leaderId, isOpen } = useVoting(month);
   const { gelenler } = useKatilim(month);
+
+  // Sınıf JS ile ekleniyor; JS çalışmazsa metin animasyonsuz ama görünür kalır.
+  const [heroGirisi, setHeroGirisi] = useState(false);
+  useEffect(() => {
+    if (heroGirisiOynadi) return;
+    heroGirisiOynadi = true;
+    setHeroGirisi(true);
+  }, []);
 
   // Bu ayın kitabı SADECE takvimde kesinleşmiş bir kayıt varsa bellidir.
   // Yoksa uydurma bir kitap göstermek yerine "oylama sürüyor" hâline geçeriz —
@@ -52,7 +65,8 @@ export default function HomePage() {
             ))}
         </div>
 
-        <div className="hero-text">
+        {/* Kapak bu animasyona dahil değil, olduğu yerde durur. */}
+        <div className={heroGirisi ? "hero-text hero-giris" : "hero-text"}>
           {botm ? (
             <>
               {/* Ay tek başına, kitabın NEDEN orada olduğunu söylemiyor;
