@@ -57,9 +57,9 @@ npm.cmd run rules
 ```
 
 İlk kullanımda bir kez `firebase login` gerekir — tarayıcıda Google girişi açar.
-Not: CLI'ın kendi "güncelleme kontrolü" adımı bu makinede
-`C:\Users\silak\.config` izinleri yüzünden hata veriyor; yayınlamayı engelliyor
-mu denenmedi. Takılırsan 1. yola dön, o hep çalışır.
+Not: CLI'ın kendi "güncelleme kontrolü" adımı Windows'ta kullanıcı klasöründeki
+`.config` dizini izinleri yüzünden hata verebiliyor; yayınlamayı engelliyor mu
+denenmedi. Takılırsan 1. yola dön, o hep çalışır.
 
 > **Sıra önemli:** Yayınlamadan önce mevcut tüm üyelere `approved: true`
 > eklenmiş olmalı. Aksi halde sen dahil herkes yazma yetkisini kaybeder.
