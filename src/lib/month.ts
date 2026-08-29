@@ -1,13 +1,20 @@
 // Ay anahtarı yardımcıları. Ay anahtarı formatı hep "YYYY-MM" (örn. "2026-07").
 
 // Şu anki ayın anahtarını döndürür.
+// UTC değil YEREL takvime bakar: `toISOString()` UTC ürettiği için Türkiye'de
+// (UTC+3) her ayın ilk üç saatinde bir önceki ay dönüyordu — 1 Eylül 01:00'de
+// siteye giren kişi hero'da hâlâ Ağustos kitabını görüyordu.
 export function currentMonth(): string {
-  return new Date().toISOString().slice(0, 7);
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
 // Ay anahtarını okunabilir Türkçe etikete çevirir (örn. "Temmuz 2026").
+// Parçalardan yerel tarih kuruyoruz: `new Date("2026-07-01")` UTC gece yarısı
+// olarak okunur ve saati geri olan bir dilimde bir önceki ayı yazdırır.
 export function monthLabel(m: string): string {
-  return new Date(m + "-01").toLocaleDateString("tr-TR", {
+  const [yil, ay] = m.split("-").map(Number);
+  return new Date(yil, ay - 1, 1).toLocaleDateString("tr-TR", {
     month: "long",
     year: "numeric",
   });

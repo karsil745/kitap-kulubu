@@ -10,8 +10,10 @@ export function zamanOnce(ms: number, simdi = Date.now()): string {
   const fark = simdi - ms;
   if (fark < DAKIKA) return "az önce";
   if (fark < SAAT) return `${Math.floor(fark / DAKIKA)} dakika önce`;
-  if (fark < GUN) return `${Math.floor(fark / SAAT)} saat önce`;
-  if (fark < 2 * GUN) return "dün";
+  // "Dün" takvim günüdür, 48 saatlik pencere değil: akşam 23:00'te bakan biri
+  // için 30 saat öncesi evvelki gündü, "dün" demek yanlıştı.
+  if (ayniGun(ms, simdi)) return `${Math.floor(fark / SAAT)} saat önce`;
+  if (ayniGun(ms, simdi - GUN)) return "dün";
   if (fark < 30 * GUN) return `${Math.floor(fark / GUN)} gün önce`;
   return new Date(ms).toLocaleDateString("tr-TR", {
     day: "numeric",

@@ -51,7 +51,12 @@ export function useQuoteOfTheDay(): QuoteOfTheDay {
     return unsub;
   }, []);
 
-  const dayIndex = Math.floor(Date.now() / 86400000);
+  // Gün numarası yerel takvime göre: ham `Date.now()/86400000` UTC gününü
+  // sayar, yani söz gece yarısı değil sabaha karşı 03:00'te değişiyordu.
+  const simdi = new Date();
+  const dayIndex = Math.floor(
+    (simdi.getTime() - simdi.getTimezoneOffset() * 60_000) / 86_400_000
+  );
 
   // Vitrin havuzu: kısa alıntılar + her üyeden en fazla bir tane. `quotes`
   // zaten id'ye göre sıralı olduğu için "hangi alıntı" seçimi de kararlı.

@@ -43,9 +43,16 @@ export function useSchedule() {
 
   // O ayın buluşma zamanını ayarlar (null → kaldırır). Sadece yönetici;
   // kurallar da schedule yazımını isAdmin() ile sınırlıyor.
+  // `month` alanını da yazıyoruz: kayıt henüz yoksa merge onu tek alanlı
+  // (sadece meetingAt) oluşturuyordu ve `current`/`byMonth` belge id'sine değil
+  // bu alana baktığı için o kayıt hiçbir yerde görünmüyordu.
   async function setMeeting(month: string, ms: number | null) {
     if (!isAdmin) return;
-    await setDoc(doc(db, "schedule", month), { meetingAt: ms }, { merge: true });
+    await setDoc(
+      doc(db, "schedule", month),
+      { month, meetingAt: ms },
+      { merge: true }
+    );
   }
 
   return { current, archive, byMonth, setMeeting };
