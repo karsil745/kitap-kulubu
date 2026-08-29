@@ -43,8 +43,23 @@ bu kasıtlı.
 
 ## Kural değişikliği yayınlama
 
-`firestore.rules` **elle** Firebase Console → Firestore Database → Kurallar
-sekmesine yapıştırılıp "Yayınla" denmeli (projede firebase CLI yok).
+İki yol var.
+
+**1. Console'dan elle (her zaman çalışır).** `firestore.rules` dosyasının
+içeriği Firebase Console → Firestore Database → Kurallar sekmesine yapıştırılıp
+"Yayınla" denir.
+
+**2. CLI ile.** `firebase-tools` artık projenin bir devDependency'si
+(bu satır yazılırken 15.26.0) ve komut hazır:
+
+```
+npm.cmd run rules
+```
+
+İlk kullanımda bir kez `firebase login` gerekir — tarayıcıda Google girişi açar.
+Not: CLI'ın kendi "güncelleme kontrolü" adımı bu makinede
+`C:\Users\silak\.config` izinleri yüzünden hata veriyor; yayınlamayı engelliyor
+mu denenmedi. Takılırsan 1. yola dön, o hep çalışır.
 
 > **Sıra önemli:** Yayınlamadan önce mevcut tüm üyelere `approved: true`
 > eklenmiş olmalı. Aksi halde sen dahil herkes yazma yetkisini kaybeder.

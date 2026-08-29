@@ -20,8 +20,7 @@ ve **sohbet** aynı yerde birikir. Zamanla ortaya kulübün hafızası çıkar:
 - **Takvim** — geçmiş ve gelecek ayların programı
 - **Günün sözü** — kulübün alıntılarından rastgele biri
 
-Açık/koyu tema ve dört renk paleti var; hareketler `prefers-reduced-motion`
-ayarına saygı duyar.
+Açık ve koyu tema var; hareketler `prefers-reduced-motion` ayarına saygı duyar.
 
 ## Teknoloji
 

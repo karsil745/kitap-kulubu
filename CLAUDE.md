@@ -22,9 +22,9 @@ arka planda başlatılan kabuklarda PATH'te olmayabilir, gerekirse tam yol ver.
 Test altyapısı **yok**. Doğrulama = `build` + `lint` + tarayıcıda bakmak.
 Değişikliği "çalışıyor" diye bildirmeden önce en az `build` çalıştır.
 
-> `npm run rules` (firebase-tools bir devDependency) ile GUVENLIK.md'deki
-> "projede firebase CLI yok, kuralları Console'a elle yapıştır" cümlesi
-> çelişiyor. Kural yayınlamadan önce hangisinin geçerli olduğunu doğrula.
+> `npm.cmd run rules` bir kez `firebase login` ister ve CLI'ın güncelleme
+> kontrolü bu makinede hata veriyor. Kural yayınlamanın her zaman çalışan yolu
+> Console'a elle yapıştırmaktır; bkz. GUVENLIK.md.
 
 ## Mimari
 
