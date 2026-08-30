@@ -114,4 +114,12 @@ görünürken dört adımı da uygulanmıştı.
 ## Dağıtım
 
 Firebase projesi `kitapkulup-d09be`, barındırma Vercel (`vercel.json`).
-`.env.local` git'e gönderilmez; şablonu `.env.example`.
+Canlı adres: https://kitap-kulubu-nu.vercel.app
+
+Vercel projesi GitHub deposuna bağlı (2026-08-30): **`master`'a push edilen her
+commit otomatik dağıtılır**, elle `vercel --prod` çalıştırmaya gerek yok.
+Dağıtım çıkmadıysa Vercel'de **proje** ayarlarına bak (takım ayarlarına değil):
+Project Settings → Git.
+
+`.env.local` git'e gönderilmez; şablonu `.env.example`. Firebase değişkenleri
+Vercel'de proje ortam değişkeni olarak ayrıca tanımlı olmalı.
