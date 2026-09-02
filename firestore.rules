@@ -132,9 +132,21 @@ service cloud.firestore {
       allow update: if (
                       request.auth != null && request.auth.uid == userId
                       && request.resource.data.diff(resource.data).affectedKeys()
-                           .hasOnly(['name','avatar','photo','bio'])
+                           .hasOnly(['name','avatar','photo','bio','chatSeenAt','readingGoal'])
                       && shortText(request.resource.data.name, 100)
                       && shortText(request.resource.data.bio, 500)
+                      // chatSeenAt dokunulduysa sadece zaman damgası olabilir —
+                      // Navbar rozetini kimse elle şişiremez.
+                      && (!request.resource.data.diff(resource.data).affectedKeys()
+                            .hasAny(['chatSeenAt'])
+                          || request.resource.data.chatSeenAt is int)
+                      // readingGoal dokunulduysa 1–1000 arası tam sayı olmalı —
+                      // profildeki ilerleme çubuğunu saçma bir değer bozmasın.
+                      && (!request.resource.data.diff(resource.data).affectedKeys()
+                            .hasAny(['readingGoal'])
+                          || ( request.resource.data.readingGoal is int
+                               && request.resource.data.readingGoal > 0
+                               && request.resource.data.readingGoal <= 1000 ))
                     ) || (
                       // Yönetici başkasının üyeliğini onaylar/geri alır.
                       // SADECE `approved` alanına dokunabilir — `role` hâlâ

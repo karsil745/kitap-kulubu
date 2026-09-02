@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import { useUnreadChat } from "../hooks/useUnreadChat";
 import Avatar from "./Avatar";
 import ThemeToggle from "./ThemeToggle";
 
@@ -16,6 +17,7 @@ const LINKS = [
 // dar ekranda üç satıra sarıp ekranın beşte birini yiyordu.
 export default function Navbar() {
   const { currentUser, isMember, logout } = useApp();
+  const unreadChat = useUnreadChat();
 
   // Sohbet yalnızca onaylı üyeye görünür — kurallarda okuma da isMember()
   // şartına bağlı, onaysız kişiye bağlantı göstermek boşuna hayal kırıklığı.
@@ -24,6 +26,19 @@ export default function Navbar() {
     ...(isMember ? [{ to: "/sohbet", label: "Sohbet" }] : []),
     ...(currentUser ? [{ to: "/profil", label: "Profil" }] : []),
   ];
+
+  // Sohbet linkinin yanına okunmamış sayısını ekler. Kutu/baloncuk yok —
+  // sadece vurgu renginde bir sayı (bu projenin rozet dilinin aynısı, bkz.
+  // BadgeList: "hap değil, versal etiket").
+  function linkIcerik(l: (typeof links)[number]) {
+    if (l.to !== "/sohbet" || unreadChat === 0) return l.label;
+    return (
+      <>
+        {l.label}
+        <span className="chat-unread">{unreadChat}</span>
+      </>
+    );
+  }
 
   return (
     <>
@@ -52,7 +67,7 @@ export default function Navbar() {
       <nav className="nav-links">
         {links.map((l) => (
           <NavLink key={l.to} to={l.to} end={l.end}>
-            {l.label}
+            {linkIcerik(l)}
           </NavLink>
         ))}
       </nav>
@@ -82,7 +97,7 @@ export default function Navbar() {
     <nav className="tabbar" aria-label="Ana menü">
       {links.map((l) => (
         <NavLink key={l.to} to={l.to} end={l.end}>
-          {l.label}
+          {linkIcerik(l)}
         </NavLink>
       ))}
     </nav>

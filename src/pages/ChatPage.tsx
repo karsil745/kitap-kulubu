@@ -1,4 +1,4 @@
-import { Fragment, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { Link } from "react-router-dom";
 import { useApp } from "../context/AppContext";
@@ -43,12 +43,18 @@ type Satir =
 // metaforu tutanak, tutanak konuşulanı da olanı da yazar. Yeni veri yok —
 // akış zaten mevcut koleksiyonlardan türetiliyor (bkz. useActivity).
 export default function ChatPage() {
-  const { currentUser, users, books, isMember, isAdmin } = useApp();
+  const { currentUser, users, books, isMember, isAdmin, markChatSeen } = useApp();
   const { mesajlar, gonder, sil, yukleniyor } = useMessages();
   const hareketler = useActivity(HAREKET_SAYISI);
   const [taslak, setTaslak] = useState("");
   const [gonderiliyor, setGonderiliyor] = useState(false);
   usePageTitle("Sohbet");
+
+  // Sayfa açıkken Navbar'daki okunmamış rozeti hep sıfır kalsın: her yeni
+  // mesaj/hareket geldiğinde "gördüm" zamanını da ileri alıyoruz.
+  useEffect(() => {
+    markChatSeen();
+  }, [mesajlar.length, hareketler.length]);
 
   const akisRef = useRef<HTMLDivElement>(null);
   // Kullanıcı en altta mı? Yukarıda geçmişi okuyorsa yeni mesaj gelince

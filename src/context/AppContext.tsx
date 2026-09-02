@@ -65,6 +65,10 @@ interface AppState {
   updateAvatar: (opts: { avatar?: string; photo?: string | null }) => Promise<void>;
   // Yönetici bir üyenin kulüp onayını verir/geri alır (users/{uid}.approved).
   setApproved: (userId: string, approved: boolean) => Promise<void>;
+  // Sohbet sayfası açıldığında çağrılır; Navbar'daki okunmamış rozetini sıfırlar.
+  markChatSeen: () => Promise<void>;
+  // Kullanıcı yıllık okuma hedefini belirler/değiştirir (users/{uid}.readingGoal).
+  setReadingGoal: (goal: number) => Promise<void>;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -353,6 +357,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await updateDoc(doc(db, "users", userId), { approved });
   }
 
+  // Sohbet sayfası her açıldığında/güncellendiğinde çağrılır, "son görülme"
+  // zamanını şimdiye çeker. updateAvatar'daki gibi iyimser güncelleme
+  // yapıyoruz ki rozet Firestore'un cevabını beklemeden hemen sıfırlansın.
+  async function markChatSeen() {
+    if (!currentUser) return;
+    const now = Date.now();
+    setCurrentUser((prev) => (prev ? { ...prev, chatSeenAt: now } : prev));
+    await updateDoc(doc(db, "users", currentUser.id), { chatSeenAt: now });
+  }
+
+  // Yıllık okuma hedefini yazar. Sıfır/negatif ya da tam sayı olmayan
+  // değerleri sessizce yok sayıyoruz — çağıran taraf (ReadingGoal) zaten
+  // bunu doğruluyor ama kural da aynısını zorunlu kılıyor.
+  async function setReadingGoal(goal: number) {
+    if (!currentUser || !Number.isInteger(goal) || goal <= 0) return;
+    setCurrentUser((prev) => (prev ? { ...prev, readingGoal: goal } : prev));
+    await updateDoc(doc(db, "users", currentUser.id), { readingGoal: goal });
+  }
+
   // Firebase'den giriş durumu gelene kadar kısa bir yükleniyor ekranı
   if (!authReady) {
     return <div className="section loading">Yükleniyor…</div>;
@@ -377,6 +400,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ensureAuthor,
         updateAvatar,
         setApproved,
+        markChatSeen,
+        setReadingGoal,
       }}
     >
       {children}

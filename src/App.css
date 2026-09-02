@@ -84,6 +84,13 @@
 .nav-links a.active {
   color: var(--accent);
 }
+/* Sohbetteki okunmamış sayısı — kutu/baloncuk yok, sadece vurgu renkli sayı */
+.chat-unread {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.85em;
+  margin-left: 0.35em;
+}
 .nav-user {
   display: flex;
   align-items: center;
@@ -765,6 +772,14 @@ textarea {
   font-size: var(--fs-h2);
 }
 
+/* "Aynı dönemden yazarlar" — kartın altında sessiz bir keşif satırı,
+   ayrı bir bölüm başlığı hak edecek kadar ağır değil. */
+.author-related {
+  margin-top: 2.2rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 /* ---- Puan yıldızları ---- */
 .star-rating {
   display: inline-flex;
@@ -1081,6 +1096,23 @@ textarea {
 /* "Kulüp Nerede" listesi — kutusuz, sadece isim + ince çubuk + yüzde */
 .reading-progress {
   margin-top: 2.5rem;
+}
+
+/* Profildeki yıllık okuma hedefi — aynı ince çubuk dili, kutu yok */
+.reading-goal {
+  margin: 1.8rem 0 2.2rem;
+}
+.reading-goal-summary {
+  margin: 0.3rem 0 0.6rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+/* .progress-track normalde bir flex satırının içinde genişler (bkz.
+   .progress-row); burada tek başına olduğu için genişliği kendisi almalı. */
+.reading-goal .progress-track {
+  display: block;
+  width: 100%;
+  max-width: 380px;
 }
 /* ---- Tartışma soruları ---- */
 /* Numaralı editoryal liste: soru serif ve iri, cevaplar altında girintili.

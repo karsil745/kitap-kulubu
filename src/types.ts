@@ -39,6 +39,13 @@ export interface User {
   // (kurallar istemcinin bu alanı yazmasını engeller). false/yok ise kişi
   // siteyi gezebilir ama hiçbir şey yazamaz.
   approved?: boolean;
+  // Sohbet sayfasını en son ne zaman açtığı (ms). Navbar'daki okunmamış
+  // rozetini hesaplamak için kullanılır; hiç yoksa "henüz hiç girmedi" demek.
+  chatSeenAt?: number;
+  // Kullanıcının bu yıl okumayı hedeflediği kitap sayısı. Yıl bilgisi
+  // tutulmuyor — her Ocak'ta kullanıcı isterse yeni bir sayı girer, girmezse
+  // eski hedef üzerinden ilerleme sıfırdan sayılmaya devam eder.
+  readingGoal?: number;
 }
 
 // Bir kullanıcının bir kitapla ilişkisi (okudu / okuyor / okumak istiyor)

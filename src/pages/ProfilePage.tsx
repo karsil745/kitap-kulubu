@@ -7,6 +7,7 @@ import { useMyShelves } from "../hooks/useShelves";
 import { usePageTitle } from "../hooks/usePageTitle";
 import BookCard from "../components/BookCard";
 import BadgeList from "../components/BadgeList";
+import ReadingGoal from "../components/ReadingGoal";
 import StarRating from "../components/StarRating";
 import Avatar from "../components/Avatar";
 import MemberApprovals from "../components/MemberApprovals";
@@ -69,6 +70,8 @@ export default function ProfilePage() {
           <p className="book-recs">{myBooks.length} kitap önerdin</p>
         </div>
       </div>
+
+      <ReadingGoal />
 
       {/* Yönetici değilsen bu bölüm hiç render edilmez */}
       <MemberApprovals />

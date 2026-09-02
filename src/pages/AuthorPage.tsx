@@ -24,6 +24,12 @@ export default function AuthorPage() {
 
   const authorBooks = books.filter((b) => b.authorId === author.id);
 
+  // Aynı dönem/akımdan diğer yazarlar — kütüphanede zaten varlar, sadece
+  // era etiketiyle eşleştirip bağlantısını çıkarıyoruz. Yeni veri yok.
+  const sameEraAuthors = author.era
+    ? authors.filter((a) => a.id !== author.id && a.era === author.era)
+    : [];
+
   return (
     <div className="section detail">
       <Link to="/kitaplar" className="link-more">
@@ -53,6 +59,19 @@ export default function AuthorPage() {
             <BookCard key={b.id} book={b} />
           ))}
         </div>
+      )}
+
+      {/* Veri yoksa hiç render edilmez — boş "ilgili yazar yok" metni yazmıyoruz. */}
+      {sameEraAuthors.length > 0 && (
+        <p className="author-related">
+          Aynı dönemden diğer yazarlar:{" "}
+          {sameEraAuthors.map((a, i) => (
+            <span key={a.id}>
+              <Link to={`/yazar/${a.id}`}>{a.name}</Link>
+              {i < sameEraAuthors.length - 1 && ", "}
+            </span>
+          ))}
+        </p>
       )}
     </div>
   );
