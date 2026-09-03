@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import type { Author, Book, Review, User } from "../types";
+import type { Author, Book, Figure, Review, User } from "../types";
 import { auth, db, googleProvider } from "../lib/firebase";
 import {
   getRedirectResult,
@@ -60,9 +60,11 @@ interface AppState {
   updateBook: (bookId: string, patch: Partial<Book>) => Promise<void>;
   // Ada göre yazar bulur; yoksa yeni yazar belgesi oluşturur ve id'sini döndürür
   ensureAuthor: (name: string, era: string) => Promise<string>;
-  // Giriş yapan kullanıcının avatarını günceller: emoji seçilirse `avatar` +
-  // `photo: null`, Google fotoğrafı seçilirse sadece `photo` gönderilir.
-  updateAvatar: (opts: { avatar?: string; photo?: string | null }) => Promise<void>;
+  // Giriş yapan kullanıcının Google fotoğrafını açar/kapatır (emoji yoktu,
+  // artık figür var — bkz. setFigure). `null` fotoğrafı kaldırıp figüre döner.
+  updateAvatar: (photo: string | null) => Promise<void>;
+  // Kullanıcı "Profili özelleştir" ekranında kendi figürünü kaydeder.
+  setFigure: (figure: Figure) => Promise<void>;
   // Yönetici bir üyenin kulüp onayını verir/geri alır (users/{uid}.approved).
   setApproved: (userId: string, approved: boolean) => Promise<void>;
   // Sohbet sayfası açıldığında çağrılır; Navbar'daki okunmamış rozetini sıfırlar.
@@ -151,11 +153,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
         setCurrentUser({ id: fbUser.uid, ...data } as User);
       } else {
-        const avatars = ["🦊", "🐧", "🦋", "🐢", "🦁", "🐨", "🦄", "🐙"];
+        // `figure` bilerek boş bırakılıyor — Avatar bileşeni kimlikten sabit
+        // bir figür türetiyor, kişi Profilim'den isterse kendi seçimini yapar.
         const newUser: User = {
           id: fbUser.uid,
           name: fbUser.displayName ?? "İsimsiz üye",
-          avatar: avatars[Math.floor(Math.random() * avatars.length)],
           photo: fbUser.photoURL ?? null,
           bio: "Yeni üye 👋",
         };
@@ -335,14 +337,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return ref.id;
   }
 
-  // Giriş yapan kullanıcının avatarını günceller. Emoji seçilirse fotoğrafı
-  // sıfırlarız (photo: null); Google fotoğrafı seçilirse sadece onu yazarız.
-  async function updateAvatar(opts: { avatar?: string; photo?: string | null }) {
+  // Google fotoğrafını açar (photoURL) ya da kapatır (null) — kapatınca
+  // Avatar bileşeni otomatik olarak figüre döner.
+  async function updateAvatar(photo: string | null) {
     if (!currentUser) return;
-    await updateDoc(doc(db, "users", currentUser.id), opts);
+    await updateDoc(doc(db, "users", currentUser.id), { photo });
     // currentUser gerçek zamanlı dinlenmediği için değişikliği burada da
     // yansıtıyoruz (iyimser güncelleme) — sayfa yenilenmeden anında görünsün.
-    setCurrentUser((prev) => (prev ? { ...prev, ...opts } : prev));
+    setCurrentUser((prev) => (prev ? { ...prev, photo } : prev));
+  }
+
+  // "Profili özelleştir" ekranındaki seçimleri kaydeder.
+  async function setFigure(figure: Figure) {
+    if (!currentUser) return;
+    await updateDoc(doc(db, "users", currentUser.id), { figure });
+    setCurrentUser((prev) => (prev ? { ...prev, figure } : prev));
   }
 
   // Üyelik onayı: yönetici Profil sayfasındaki listeden verir. Daha önce bu
@@ -399,6 +408,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         updateBook,
         ensureAuthor,
         updateAvatar,
+        setFigure,
         setApproved,
         markChatSeen,
         setReadingGoal,

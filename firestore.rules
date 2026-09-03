@@ -125,16 +125,31 @@ service cloud.firestore {
       // "role" ve "approved" alanlarına dokunamaz — yöneticilik ve üyelik bu
       // yoldan kazanılamaz, sadece Firebase Console'dan elle atanır.
       allow create: if request.auth != null && request.auth.uid == userId
-                    && onlyFields(['name','avatar','photo','bio'])
+                    && onlyFields(['name','photo','bio'])
                     && shortText(request.resource.data.name, 100)
                     && shortText(request.resource.data.bio, 500);
 
       allow update: if (
                       request.auth != null && request.auth.uid == userId
                       && request.resource.data.diff(resource.data).affectedKeys()
-                           .hasOnly(['name','avatar','photo','bio','chatSeenAt','readingGoal'])
+                           .hasOnly(['name','photo','bio','chatSeenAt','readingGoal','figure'])
                       && shortText(request.resource.data.name, 100)
                       && shortText(request.resource.data.bio, 500)
+                      // figure dokunulduysa tam olarak 5 alt-alanı olmalı, hepsi
+                      // kısa metin — DiceBear'a giden değerler, geçersiz olsa
+                      // bile en fazla rastgele bir figüre düşer; burada sadece
+                      // kota şişirmeyi (dev metin yazmayı) engelliyoruz.
+                      && (!request.resource.data.diff(resource.data).affectedKeys()
+                            .hasAny(['figure'])
+                          || ( request.resource.data.figure.keys()
+                                 .hasOnly(['bodyVariant','bodyColor','eyesVariant','mouthVariant','backgroundColor'])
+                               && request.resource.data.figure.keys()
+                                    .hasAll(['bodyVariant','bodyColor','eyesVariant','mouthVariant','backgroundColor'])
+                               && shortText(request.resource.data.figure.bodyVariant, 30)
+                               && shortText(request.resource.data.figure.bodyColor, 30)
+                               && shortText(request.resource.data.figure.eyesVariant, 30)
+                               && shortText(request.resource.data.figure.mouthVariant, 30)
+                               && shortText(request.resource.data.figure.backgroundColor, 30) ))
                       // chatSeenAt dokunulduysa sadece zaman damgası olabilir —
                       // Navbar rozetini kimse elle şişiremez.
                       && (!request.resource.data.diff(resource.data).affectedKeys()

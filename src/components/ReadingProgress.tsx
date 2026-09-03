@@ -44,7 +44,7 @@ export default function ReadingProgress({ bookId }: { bookId: string }) {
           return (
             <li className="progress-row" key={shelf.id}>
               <span className="progress-who">
-                <Avatar user={user ?? { avatar: "👤", photo: null }} size={22} />
+                <Avatar user={user ?? { id: shelf.userId, photo: null }} size={22} />
                 {isMe ? "Sen" : user?.name ?? "Üye"}
               </span>
 

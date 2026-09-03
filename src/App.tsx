@@ -6,6 +6,7 @@ import BooksPage from "./pages/BooksPage";
 import BookDetailPage from "./pages/BookDetailPage";
 import AuthorPage from "./pages/AuthorPage";
 import ProfilePage from "./pages/ProfilePage";
+import FigureBuilderPage from "./pages/FigureBuilderPage";
 import LoginPage from "./pages/LoginPage";
 import VotePage from "./pages/VotePage";
 import CalendarPage from "./pages/CalendarPage";
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/kitap/:id" element={<BookDetailPage />} />
           <Route path="/yazar/:id" element={<AuthorPage />} />
           <Route path="/profil" element={<ProfilePage />} />
+          <Route path="/profil/figur" element={<FigureBuilderPage />} />
           <Route path="/giris" element={<LoginPage />} />
           <Route path="/oylama" element={<VotePage />} />
           <Route path="/takvim" element={<CalendarPage />} />

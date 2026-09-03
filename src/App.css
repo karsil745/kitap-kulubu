@@ -1345,20 +1345,100 @@ textarea {
 .avatar-picker {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.7rem;
   margin-bottom: 2rem;
 }
-/* Emoji seçenekleri .chip sınıfını paylaşıyor ama versal/harf aralığı
-   ayarları emojiye uymuyor — burada sıfırlanır. */
-.avatar-option {
-  font-size: 1.3rem;
-  line-height: 1;
-  padding: 0.35rem 0.35rem 0.45rem;
-  letter-spacing: normal;
-  margin-right: 0.35rem;
+
+/* ---- Profili özelleştir (figür oluşturucu) ---- */
+.figure-builder {
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
 }
-.avatar-option-photo {
-  font-size: 0.85rem;
+.figure-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 1.5rem 0 2.5rem;
+}
+.figure-stage img {
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.figure-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  margin-bottom: 2rem;
+}
+.figure-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 0.9rem;
+}
+.figure-row-label {
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  color: var(--muted);
+  font-weight: 700;
+}
+.figure-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-width: 300px;
+}
+.figure-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+}
+.figure-swatch.active {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+}
+/* Gövde şekli: ok tuşuyla tek tek değil, hepsi küçük önizleme olarak altta */
+.figure-row-stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+.figure-shapes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.figure-shape {
+  width: 62px;
+  height: 62px;
+  padding: 0;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.figure-shape img {
+  width: 100%;
+  height: 100%;
+}
+.figure-shape.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 /* ---- Giriş sayfası ekstra ---- */

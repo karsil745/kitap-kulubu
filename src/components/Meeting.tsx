@@ -116,7 +116,7 @@ export default function Meeting({
                   return (
                     <Avatar
                       key={k.id}
-                      user={kisi ?? { avatar: "👤", photo: null }}
+                      user={kisi ?? { id: k.userId, photo: null }}
                       size={24}
                     />
                   );

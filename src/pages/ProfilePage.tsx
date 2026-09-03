@@ -13,11 +13,6 @@ import Avatar from "../components/Avatar";
 import MemberApprovals from "../components/MemberApprovals";
 import type { Review } from "../types";
 
-// Profil sayfasında seçilebilecek emoji avatarlar.
-const AVATAR_OPTIONS = [
-  "🦉", "🐺", "🦊", "🐧", "🦋", "🐢", "🦁", "🐨", "🦄", "🐙", "📚", "☕", "🌙", "🦇",
-];
-
 // Kullanıcının kendi profili: bilgileri + rafları + rozetleri + önerdiği
 // kitaplar + verdiği yorumlar.
 export default function ProfilePage() {
@@ -80,31 +75,19 @@ export default function ProfilePage() {
         <h2>Avatarım</h2>
       </div>
       <div className="avatar-picker">
-        {AVATAR_OPTIONS.map((emoji) => (
-          <button
-            key={emoji}
-            className={
-              !currentUser.photo && currentUser.avatar === emoji
-                ? "chip avatar-option active"
-                : "chip avatar-option"
-            }
-            onClick={() => updateAvatar({ avatar: emoji })}
-          >
-            {emoji}
-          </button>
-        ))}
+        <Link to="/profil/figur" className="btn-primary">
+          Profili özelleştir
+        </Link>
         {auth.currentUser?.photoURL && (
           <button
-            className={
-              currentUser.photo
-                ? "chip avatar-option-photo active"
-                : "chip avatar-option-photo"
-            }
+            className={currentUser.photo ? "chip active" : "chip"}
             onClick={() =>
-              updateAvatar({ photo: auth.currentUser?.photoURL ?? null })
+              updateAvatar(currentUser.photo ? null : auth.currentUser?.photoURL ?? null)
             }
           >
-            Google fotoğrafımı kullan
+            {currentUser.photo
+              ? "Google fotoğrafını kaldır"
+              : "Google fotoğrafımı kullan"}
           </button>
         )}
       </div>

@@ -110,13 +110,11 @@ export const users: User[] = [
   {
     id: "u1",
     name: "Elif",
-    avatar: "🦉",
     bio: "Klasik romanların ve iyi bir çayın hayranı.",
   },
   {
     id: "u2",
     name: "Can",
-    avatar: "🐺",
     bio: "Distopya ve bilim kurgu okumayı seviyorum.",
   },
 ];

@@ -28,11 +28,23 @@ export interface Book {
   createdAt?: number;
 }
 
+// Kullanıcının kendi "giydirdiği" figürü (DiceBear "Critters" stili).
+// Resim hiç saklanmıyor — bu 5 seçim her yerde anlık olarak bir SVG'ye
+// çevriliyor (bkz. src/lib/figure.ts). Kimse figürünü seçmediyse bile
+// boşta kalmaz: Avatar bileşeni kullanıcı kimliğinden sabit bir tane türetir.
+export interface Figure {
+  bodyVariant: string;
+  bodyColor: string;
+  eyesVariant: string;
+  mouthVariant: string;
+  backgroundColor: string;
+}
+
 export interface User {
   id: string;
   name: string;
-  avatar: string; // Emoji avatar
-  photo?: string | null; // Google profil foto URL'si (varsa emoji yerine öncelikli); yoksa null
+  figure?: Figure;
+  photo?: string | null; // Google profil foto URL'si (varsa figürden öncelikli); yoksa null
   bio: string;
   role?: "admin";
   // Kulübe kabul edilmiş üye mi? Sadece Firebase Console'dan elle verilir

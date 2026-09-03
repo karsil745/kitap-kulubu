@@ -96,7 +96,7 @@ export default function QuoteList({
                 <p className="quote-text">{quote.text}</p>
                 <div className="quote-card-foot">
                   <span className="quote-author">
-                    <Avatar user={author ?? { avatar: "👤", photo: null }} size={20} />
+                    <Avatar user={author ?? { id: quote.userId, photo: null }} size={20} />
                     {author?.name ?? "Bilinmeyen üye"}
                   </span>
                   {quote.page && <span className="quote-page">s. {quote.page}</span>}

@@ -41,7 +41,7 @@ export default function ReviewList({
           <div className="review-card" key={review.id}>
             <div className="review-card-head">
               <span className="review-avatar">
-                <Avatar user={author ?? { avatar: "👤", photo: null }} size={22} />
+                <Avatar user={author ?? { id: review.userId, photo: null }} size={22} />
               </span>
               <span className="review-name">
                 {author?.name ?? "Bilinmeyen üye"}

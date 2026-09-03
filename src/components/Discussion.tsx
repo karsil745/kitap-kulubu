@@ -187,7 +187,7 @@ function QuestionRow({
             return (
               <li className="answer" key={a.id}>
                 <span className="answer-who">
-                  <Avatar user={user ?? { avatar: "👤", photo: null }} size={20} />
+                  <Avatar user={user ?? { id: a.userId, photo: null }} size={20} />
                   {user?.name ?? "Üye"}
                 </span>
                 <p className="answer-text">{a.text}</p>

@@ -266,7 +266,7 @@ export default function ChatPage() {
               <div className={blokBasi ? "chat-satir blok-basi" : "chat-satir"}>
                 {blokBasi && (
                   <div className="chat-kunye">
-                    <Avatar user={yazar ?? { avatar: "👤", photo: null }} size={22} />
+                    <Avatar user={yazar ?? { id: mesaj.uid, photo: null }} size={22} />
                     <span className={benim ? "chat-ad benim" : "chat-ad"}>
                       {yazar?.name ?? "Bilinmeyen üye"}
                     </span>
