@@ -348,10 +348,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   // "Profili özelleştir" ekranındaki seçimleri kaydeder.
+  // Figürü kaydederken Google fotoğrafını da kapatıyoruz — Avatar bileşeninde
+  // fotoğraf figürden önce geldiği için (bkz. Avatar.tsx), aksi halde kişi
+  // figürünü seçip kaydeder ama hâlâ eski Google fotoğrafını (bazı hesaplarda
+  // bu da tek harfli otomatik bir simge oluyor) görmeye devam ederdi.
   async function setFigure(figure: Figure) {
     if (!currentUser) return;
-    await updateDoc(doc(db, "users", currentUser.id), { figure });
-    setCurrentUser((prev) => (prev ? { ...prev, figure } : prev));
+    await updateDoc(doc(db, "users", currentUser.id), { figure, photo: null });
+    setCurrentUser((prev) => (prev ? { ...prev, figure, photo: null } : prev));
   }
 
   // Üyelik onayı: yönetici Profil sayfasındaki listeden verir. Daha önce bu
