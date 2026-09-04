@@ -8,13 +8,14 @@ import type { Badge, Review, Shelf, Vote } from "../types";
 export type EarnedBadge = Badge & { earned: boolean };
 
 // Tüm rozet tanımları — yeni bir rozet eklemek için sadece bu diziye
-// (ve altındaki kazanma koşuluna) eklemek yeterli.
+// (ve altındaki kazanma koşuluna) eklemek yeterli. `icon`, badgeIcons.ts
+// içindeki BADGE_ICON_PATHS'te bir anahtar (emoji değil, gerçek çizim).
 const BADGE_DEFS: Badge[] = [
-  { id: "first-rec", label: "İlk Öneri", icon: "📖", description: "En az 1 kitap önerdin." },
-  { id: "loyal", label: "Sadık Okur", icon: "📚", description: "En az 3 kitap önerdin." },
-  { id: "finisher", label: "5 Kitap Bitirdi", icon: "🏆", description: "En az 5 kitabı 'okudum' rafına ekledin." },
-  { id: "critic", label: "Eleştirmen", icon: "⭐", description: "En az 3 yorum yazdın." },
-  { id: "voter", label: "Oy Verdi", icon: "🗳️", description: "En az 1 oy kullandın." },
+  { id: "first-rec", label: "İlk Öneri", icon: "book-plus", description: "En az 1 kitap önerdin." },
+  { id: "loyal", label: "Sadık Okur", icon: "library", description: "En az 3 kitap önerdin." },
+  { id: "finisher", label: "5 Kitap Bitirdi", icon: "award", description: "En az 5 kitabı 'okudum' rafına ekledin." },
+  { id: "critic", label: "Eleştirmen", icon: "feather", description: "En az 3 yorum yazdın." },
+  { id: "voter", label: "Oy Verdi", icon: "vote", description: "En az 1 oy kullandın." },
 ];
 
 // Verilen kullanıcının rozetlerini mevcut veriden türetir — ayrı bir
