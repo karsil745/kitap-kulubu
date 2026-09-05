@@ -4,15 +4,17 @@ import { useBadges } from "../hooks/useBadges";
 import { BADGE_ICON_PATHS, BADGE_INK_GRAIN_BASE64 } from "../lib/badgeIcons";
 
 // Her rozetin sabit bir "duruşu" var — gerçek bir mühür aletinin her
-// basışta aynı biçimde çıkması gibi, rastgele değil.
-const STANCE: Record<string, { r0: number; r1: number; tx: string }> = {
-  "first-rec": { r0: -14, r1: -4, tx: "-2px" },
-  loyal: { r0: 12, r1: 4, tx: "3px" },
-  finisher: { r0: -18, r1: -6, tx: "0px" },
-  critic: { r0: 15, r1: 5, tx: "-3px" },
-  voter: { r0: -10, r1: -3, tx: "2px" },
-};
-const DEFAULT_STANCE = { r0: -12, r1: -4, tx: "0px" };
+// basışta aynı biçimde çıkması gibi, rastgele değil. Rozet id'sinden
+// türetiliyor ki yeni bir rozet eklenince elle bir satır eklemeyi unutmayalım.
+function stanceFor(id: string) {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  const sign = hash % 2 === 0 ? 1 : -1;
+  const r0 = sign * (10 + (Math.abs(hash) % 10));
+  const r1 = sign * (3 + (Math.abs(hash >> 3) % 4));
+  const tx = ((Math.abs(hash >> 6) % 7) - 3) + "px";
+  return { r0, r1, tx };
+}
 
 function seenKey(userId: string) {
   return `bibliyofili-badges-seen-${userId}`;
@@ -78,7 +80,7 @@ export default function BadgeList({ userId }: { userId: string }) {
       </svg>
 
       {badges.map((badge) => {
-        const stance = STANCE[badge.id] ?? DEFAULT_STANCE;
+        const stance = stanceFor(badge.id);
         const stroke = badge.earned ? "url(#badgeInkGrain)" : "currentColor";
         const classes = ["badge-seal"];
         if (badge.earned) classes.push("earned");
