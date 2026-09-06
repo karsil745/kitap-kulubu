@@ -86,12 +86,17 @@ export default function BooksPage() {
   return (
     <div className="section">
       <div className="section-head">
-        <h2>Kitaplar</h2>
-        <span className="hint">
-          {filtered.length === books.length
-            ? `${books.length} kitap`
-            : `${filtered.length} / ${books.length} kitap`}
-        </span>
+        {/* Sayaç başlığın künyesi: `space-between` içinde ayrı bir esnek çocuk
+            olarak dururken ziyaretçide en sağa fırlıyor, üye görünümünde ise
+            başlıkla buton arasında ortada asılı kalıyordu. */}
+        <div className="books-basligi">
+          <h2>Kitaplar</h2>
+          <span className="hint">
+            {filtered.length === books.length
+              ? `${books.length} kitap`
+              : `${filtered.length} / ${books.length} kitap`}
+          </span>
+        </div>
         {isMember && (
           <button
             className="btn-primary"
@@ -104,45 +109,50 @@ export default function BooksPage() {
 
       {showForm && <AddBookForm onDone={() => setShowForm(false)} />}
 
+      {/* Arama, sıralama ve dönem filtresi TEK araç çubuğunda. Üçü ayrı ayrı
+          şerit hâlinde ve eşit aralıklarla dizilince hangisinin hangisine ait
+          olduğu okunmuyordu; artık kılcal çizgiyle ayrılan tek bir blok. */}
       <div className="book-tools">
-        <input
-          className="book-search"
-          type="search"
-          placeholder="Kitap ya da yazar ara"
-          value={arama}
-          onChange={(e) => setArama(e.target.value)}
-        />
-        <select
-          className="book-sort"
-          value={siralama}
-          onChange={(e) => setSiralama(e.target.value as Siralama)}
-          aria-label="Sıralama"
-        >
-          {SIRALAMALAR.map((s) => (
-            <option key={s.value} value={s.value}>
-              {s.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Dönem filtreleri */}
-      <div className="filters">
-        <button
-          className={activeEra === "Hepsi" ? "chip active" : "chip"}
-          onClick={() => setActiveEra("Hepsi")}
-        >
-          Hepsi
-        </button>
-        {eraChips.map((era) => (
-          <button
-            key={era}
-            className={activeEra === era ? "chip active" : "chip"}
-            onClick={() => setActiveEra(era)}
+        <div className="book-tools-row">
+          <input
+            className="book-search"
+            type="search"
+            placeholder="Kitap ya da yazar ara"
+            value={arama}
+            onChange={(e) => setArama(e.target.value)}
+          />
+          <select
+            className="book-sort"
+            value={siralama}
+            onChange={(e) => setSiralama(e.target.value as Siralama)}
+            aria-label="Sıralama"
           >
-            {era}
+            {SIRALAMALAR.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Dönem filtreleri */}
+        <div className="filters">
+          <button
+            className={activeEra === "Hepsi" ? "chip active" : "chip"}
+            onClick={() => setActiveEra("Hepsi")}
+          >
+            Hepsi
           </button>
-        ))}
+          {eraChips.map((era) => (
+            <button
+              key={era}
+              className={activeEra === era ? "chip active" : "chip"}
+              onClick={() => setActiveEra(era)}
+            >
+              {era}
+            </button>
+          ))}
+        </div>
       </div>
 
       {filtered.length === 0 ? (

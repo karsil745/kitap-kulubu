@@ -106,15 +106,24 @@
 
 /* ---- Kitap arama & sıralama ---- */
 /* Kutu/çerçeve yok: alanlar zeminden bir ton ayrılan yumuşak yüzeyler. */
+/* Araç çubuğu artık iki katlı: üstte arama + sıralama, altında dönem çipleri.
+   Başlık→araçlar sıkı, araçlar→ızgara geniş; gruplar böyle ayrışıyor. */
 .book-tools {
   display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin: 0 0 1.9rem;
+}
+.book-tools-row {
+  display: flex;
   flex-wrap: wrap;
-  gap: 0.7rem;
+  gap: 0.6rem;
   align-items: center;
-  margin: 1.4rem 0 1.1rem;
 }
 .book-search {
-  flex: 1 1 14rem;
+  /* Tuvalin tamamına yayılan 900px'lik bir arama kutusu on kitaplık bir
+     kütüphane için orantısızdı; artık makul bir genişlikte duruyor. */
+  flex: 0 1 26rem;
   /* Sıralama menüsünün doğal genişliği ("Ada göre (A–Z)") arama kutusunu
      ezmesin — dar ekranda alt satıra geçmesi çökmesinden iyi. */
   min-width: 12rem;
@@ -124,6 +133,11 @@
   width: auto;
   font: inherit;
   font-size: 0.95rem;
+  /* Sıralama menüsüyle aynı yükseklik: ikisi 43/40px olduğu için yan yana
+     hizasız duruyorlardı. `line-height` gövdeden gelen 1.55'te kalırsa satır
+     kutusu min-height'i aşıyor ve 1px fark geri geliyor. */
+  line-height: 1.2;
+  min-height: 2.7rem;
   padding: 0.6rem 0.9rem;
   border: none;
   border-radius: 10px;
@@ -140,7 +154,8 @@
 .book-sort {
   font: inherit;
   font-size: var(--fs-meta);
-  padding: 0.6rem 0.7rem;
+  min-height: 2.7rem;
+  padding: 0.6rem 0.8rem;
   border: none;
   border-radius: 10px;
   background: var(--surface-2);
@@ -487,10 +502,13 @@
 }
 
 /* ---- Kitap ızgarası & kartlar ---- */
+/* Kartlar zeminli birer kart olduğundan dikey boşluk 2.6rem'de fazla
+   geniş kalıyordu; iki eksen birbirine yaklaştırıldı. Sütun tabanı da biraz
+   büyüdü, geniş ekranda kapaklar 172px'e düşüyordu. */
 .book-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 2.6rem 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+  gap: 1.8rem 1.4rem;
 }
 /* Kutusuz kitap kartı: poster gibi kapak + ad + puan.
    Köşeler neredeyse keskin — kapak basılı bir kitap gibi dursun. */
@@ -498,10 +516,12 @@
   display: flex;
   flex-direction: column;
   color: var(--ink);
-  transition: transform 0.14s ease, box-shadow 0.14s ease;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
+/* Kalkma 4px'ten 2px'e: sayfadaki diğer hover'lar (çip, arama sonucu) yalnızca
+   ton değiştiriyor, kartın sıçraması aralarında yalnız kalıyordu. */
 .book-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-hover);
   text-decoration: none;
 }
@@ -512,9 +532,6 @@
   letter-spacing: var(--track-label);
   color: var(--muted);
   margin-bottom: 0.55rem;
-}
-.book-card:hover .book-index {
-  color: var(--accent);
 }
 .book-cover {
   aspect-ratio: 2 / 3;
@@ -534,11 +551,20 @@
 .book-cover .cover-emoji {
   font-size: 3.5rem;
 }
+/* Kart içindeki metin bloğu kartın kalan yüksekliğini kaplar; puan satırı
+   böylece kartın altına yaslanabiliyor. */
 .book-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   padding: 0.85rem 0 0;
 }
+/* İki satırlık yer BAŞTAN ayrılır: tek satırlık bir ad ile iki satırlık ad
+   yan yana gelince altlarındaki yazar ve künye satırları 22px kayıyordu.
+   Kırpma yok — üç satırlık bir ad yine büyür, bilgi kaybolmaz. */
 .book-info h3 {
   margin: 0 0 0.2rem;
+  min-height: 2.4em; /* 2 satır × line-height 1.2 */
 }
 .book-author {
   color: var(--muted);
@@ -547,12 +573,16 @@
   margin: 0;
   font-size: var(--fs-meta);
 }
-/* Puan satırı yalnızca puan VARSA çıkar — "henüz puan yok" gürültüsü kaldırıldı */
+/* Puan satırı yalnızca puan VARSA çıkar — "henüz puan yok" gürültüsü kaldırıldı.
+   `margin-top: auto` ile kartın altına yaslanır: ızgarada kartlar satırın en
+   uzununa göre uzuyor, puan satırı serbest bırakılınca kartın ortasında asılı
+   kalıyor ve satırdaki puanlar birbirini tutmuyordu. */
 .book-rating {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  margin: 0.5rem 0 0;
+  margin: auto 0 0;
+  padding-top: 0.55rem;
 }
 .book-rating .star {
   font-size: var(--fs-meta);
@@ -580,8 +610,13 @@
 .filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.3rem;
+  /* Yatay boşluk yalnızca buradan gelir. `.chip` ayrıca `margin-right`
+     taşıyor (başka yerlerde tek başına kullanılıyor); ikisi üst üste binince
+     aralar 17.6px oluyordu, o yüzden burada sıfırlanıyor. */
+  gap: 0.35rem 1.1rem;
+}
+.filters .chip {
+  margin-right: 0;
 }
 /* Filtre çipi: hap değil, versal küçük etiket — seçiliyken altı bordo çizilir */
 .chip {
@@ -2471,11 +2506,28 @@ textarea {
   background: var(--surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  padding: 0.8rem 0.9rem;
+  padding: 0.9rem 1rem;
 }
+/* `--surface-2` beyaz kartın üstünde neredeyse görünmüyordu; alanın alan
+   olduğunu söyleyen tek şey bu kılcal kenarlık. */
 .book-search,
 .book-sort {
   background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+/* Çipler aynı kartın ikinci katı: kılcal çizgi aramadan ayırır, ayrı bir
+   şerit gibi durmasını engeller. */
+.book-tools .filters {
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line);
+}
+
+/* Başlık + sayaç tek künye bloğu (bkz. BooksPage.tsx) */
+.books-basligi {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  min-width: 0;
 }
 .book-search-results,
 .add-form {
