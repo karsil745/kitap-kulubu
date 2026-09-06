@@ -94,7 +94,7 @@
 .nav-user {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.9rem;
 }
 .user-chip {
   display: flex;
@@ -139,7 +139,7 @@
 }
 .book-sort {
   font: inherit;
-  font-size: 0.9rem;
+  font-size: var(--fs-meta);
   padding: 0.6rem 0.7rem;
   border: none;
   border-radius: 10px;
@@ -225,6 +225,10 @@
 .btn-primary:active {
   transform: translateY(1px);
 }
+.btn-primary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .btn-primary.active {
   background: var(--success);
 }
@@ -239,18 +243,28 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 .btn-ghost:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+.btn-ghost:active {
+  transform: translateY(1px);
+}
+.btn-ghost:focus-visible,
+.btn-danger:focus-visible,
+.link-button:focus-visible,
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 /* Geri alınamaz işlem (yönetici silme). Sessiz durur, üstüne gelince uyarır. */
 .btn-danger {
   background: none;
   border: none;
   padding: 0.45rem 0;
-  font-size: 0.92rem;
+  font-size: var(--fs-meta);
   font-weight: 600;
   cursor: pointer;
   color: var(--muted);
@@ -262,10 +276,10 @@
 .admin-pages {
   width: 5.5rem;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: var(--fs-meta);
   padding: 0.3rem 0.5rem;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--surface);
   color: var(--ink);
 }
@@ -484,10 +498,11 @@
   display: flex;
   flex-direction: column;
   color: var(--ink);
-  transition: transform 0.14s ease;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
 }
 .book-card:hover {
   transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
   text-decoration: none;
 }
 /* Kartın sıra numarası — dergi listelerindeki gibi, kapağın üstünde */
@@ -530,7 +545,7 @@
   font-family: var(--font-display);
   font-style: italic;
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--fs-meta);
 }
 /* Puan satırı yalnızca puan VARSA çıkar — "henüz puan yok" gürültüsü kaldırıldı */
 .book-rating {
@@ -540,7 +555,7 @@
   margin: 0.5rem 0 0;
 }
 .book-rating .star {
-  font-size: 0.9rem;
+  font-size: var(--fs-meta);
 }
 .book-rating-num {
   color: var(--muted);
@@ -548,7 +563,7 @@
   letter-spacing: 0.03em;
 }
 .book-recs {
-  font-size: 0.85rem;
+  font-size: var(--fs-caption);
   color: var(--muted);
   margin: 0;
 }
@@ -660,7 +675,7 @@ textarea {
   flex-shrink: 0;
   width: 36px;
   height: 52px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--accent-soft);
   display: flex;
@@ -686,7 +701,7 @@ textarea {
 }
 .book-search-result-meta {
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: var(--fs-caption);
 }
 
 /* ---- Detay sayfası ---- */
@@ -731,7 +746,7 @@ textarea {
 .recommenders {
   margin-top: 0.9rem;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: var(--fs-meta);
 }
 .recommend-box {
   display: flex;
@@ -740,7 +755,7 @@ textarea {
   flex-wrap: wrap;
 }
 .recommend-hint {
-  font-size: 0.85rem;
+  font-size: var(--fs-caption);
 }
 .recommender {
   display: inline-flex;
@@ -777,7 +792,7 @@ textarea {
 .author-related {
   margin-top: 2.2rem;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: var(--fs-meta);
 }
 
 /* ---- Puan yıldızları ---- */
@@ -809,7 +824,7 @@ textarea {
 }
 .detail-rating-count {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: var(--fs-meta);
 }
 
 /* ---- Değerlendirmeler (puan & yorum) ---- */
@@ -825,7 +840,7 @@ textarea {
 /* Formun kime ait olduğunu belli eder — kendi yorumun burada düzenlenir */
 .review-form-label {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -865,7 +880,7 @@ textarea {
 }
 .review-date {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: var(--fs-caption);
   margin-left: auto;
 }
 .review-text {
@@ -926,7 +941,7 @@ textarea {
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
-  font-size: 0.85rem;
+  font-size: var(--fs-caption);
   color: var(--muted);
 }
 /* "Ben de" satırı: sohbet değil hemfikirlik. Kimse basmazsa hiç görünmez,
@@ -937,7 +952,7 @@ textarea {
   gap: 0.7rem;
   flex-wrap: wrap;
   margin-top: 0.6rem;
-  font-size: 0.85rem;
+  font-size: var(--fs-caption);
 }
 .quote-echo-who {
   color: var(--muted);
@@ -979,7 +994,7 @@ textarea {
   margin: 1rem 0;
 }
 .shelf-picker-title {
-  font-size: 0.85rem;
+  font-size: var(--fs-caption);
   font-weight: 600;
   color: var(--muted);
   margin: 0 0 0.4rem;
@@ -994,7 +1009,7 @@ textarea {
 .book-meta {
   margin: 0.15rem 0 0;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: var(--fs-caption);
 }
 
 /* ---- Buluşma ---- */
@@ -1032,7 +1047,7 @@ textarea {
 .meeting-add {
   color: var(--accent);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--fs-meta);
 }
 .meeting-edit {
   display: flex;
@@ -1042,10 +1057,10 @@ textarea {
 }
 .meeting-edit input {
   font: inherit;
-  font-size: 0.92rem;
+  font-size: var(--fs-meta);
   padding: 0.4rem 0.6rem;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--surface);
   color: var(--ink);
 }
@@ -1053,7 +1068,7 @@ textarea {
 .hero-meeting {
   margin: 1.1rem 0 0;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: var(--fs-meta);
 }
 
 /* ---- Okuma ilerlemesi ---- */
@@ -1067,7 +1082,7 @@ textarea {
 }
 .progress-input label {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: var(--fs-caption);
   white-space: nowrap;
 }
 .progress-input input[type="range"] {
@@ -1078,17 +1093,17 @@ textarea {
 .progress-input input[type="number"] {
   width: 5.5rem;
   font: inherit;
-  font-size: 0.92rem;
+  font-size: var(--fs-meta);
   padding: 0.35rem 0.5rem;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--surface);
   color: var(--ink);
 }
 .progress-input-value {
   color: var(--accent);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--fs-meta);
   min-width: 3.2ch;
   text-align: right;
 }
@@ -1105,7 +1120,7 @@ textarea {
 .reading-goal-summary {
   margin: 0.3rem 0 0.6rem;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: var(--fs-meta);
 }
 /* .progress-track normalde bir flex satırının içinde genişler (bkz.
    .progress-row); burada tek başına olduğu için genişliği kendisi almalı. */
@@ -1206,7 +1221,7 @@ textarea {
 .progress-summary {
   margin: 0.2rem 0 0;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: var(--fs-meta);
 }
 .progress-rows {
   list-style: none;
@@ -1245,14 +1260,14 @@ textarea {
 }
 .progress-value {
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: var(--fs-caption);
   min-width: 3.4ch;
   text-align: right;
 }
 .progress-state {
   flex: 1;
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: var(--fs-caption);
   font-style: italic;
 }
 @media (max-width: 640px) {
@@ -1466,7 +1481,7 @@ textarea {
   height: 62px;
   padding: 0;
   border: 2px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--surface);
   cursor: pointer;
   display: flex;
@@ -1591,7 +1606,7 @@ textarea {
 }
 .vote-tally-count {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: var(--fs-caption);
   flex-shrink: 0;
 }
 .vote-tally-bar-track {
@@ -1721,7 +1736,7 @@ textarea {
   flex-wrap: wrap;
   gap: 0.3rem;
   margin: 0;
-  font-size: 0.82rem;
+  font-size: var(--fs-caption);
   color: var(--muted);
 }
 .quote-of-day-book {
@@ -1762,7 +1777,7 @@ textarea {
 }
 .hint {
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: var(--fs-meta);
 }
 /* Hata mesajı — vurgu renginde, kutusuz */
 .hint.error {
@@ -1820,10 +1835,11 @@ textarea {
   gap: 0.6rem;
   color: var(--ink);
   scroll-snap-align: start;
-  transition: transform 0.14s ease;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
 }
 .gecmis-oge:hover {
   transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
   text-decoration: none;
 }
 /* Aynı sınıf hem kapak fotoğrafına (img) hem emoji yedeğine (span) gidiyor */
@@ -1895,7 +1911,7 @@ textarea {
 .chat-hareket {
   margin: 0.9rem 0;
   padding-left: 2.1rem;
-  font-size: 0.88rem;
+  font-size: var(--fs-caption);
   font-style: italic;
   color: var(--muted);
 }
@@ -2240,7 +2256,7 @@ textarea {
   padding: 0.8rem;
 }
 .book-cover {
-  border-radius: 10px;
+  border-radius: var(--radius);
   box-shadow: none;
 }
 .book-info {
@@ -2256,7 +2272,7 @@ textarea {
   gap: 0.5rem;
 }
 .gecmis-kapak {
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   width: 104px;
   height: 156px;
 }
@@ -2369,7 +2385,7 @@ textarea {
 }
 .book-search-result {
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: var(--surface-2);
 }
 

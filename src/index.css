@@ -22,7 +22,10 @@
   --star-fill: #7a5537; /* kahve yıldız */
   --star-empty: #e5dbd0;
   --on-accent: #fdfaf7; /* kahve üzerine açık yazı */
-  --shadow: 0 8px 24px -16px rgba(40, 28, 20, 0.55);
+  --shadow: 0 14px 32px -20px rgba(40, 28, 20, 0.38),
+    0 2px 8px -3px rgba(40, 28, 20, 0.14);
+  --shadow-hover: 0 20px 40px -20px rgba(40, 28, 20, 0.42),
+    0 4px 10px -3px rgba(40, 28, 20, 0.16);
   --rule: #e7ded4; /* bölüm başlığı üstündeki kılcal çizgi */
 
   --font-display: "Fraunces", Georgia, "Times New Roman", serif;
@@ -36,6 +39,7 @@
    serif başlıklar ve versal mikro-etiketler (derginin kendi sesi). */
 :root {
   --radius: 10px; /* girdi/küçük yüzey */
+  --radius-sm: 8px; /* liste içi küçük kapak/küçük-resim */
   --radius-lg: 14px; /* kart, panel */
   --radius-pill: 999px; /* sadece gerçekten hap olması gereken yerler */
 
@@ -50,6 +54,12 @@
   /* Versal mikro-etiket (bölüm üstü, eyebrow, menü) */
   --track-label: 0.19em;
   --fs-label: 0.7rem;
+
+  /* İkincil metin ölçeği — muted renkli meta/açıklama satırları önceden
+     0.82–0.92rem arasında rastgele dağılmıştı, göze aynı görünen tek
+     iki adıma indirildi. */
+  --fs-meta: 0.9rem; /* yazar adı, özet, sayaç gibi ikincil satır */
+  --fs-caption: 0.85rem; /* tarih, ipucu, küçük alt bilgi */
 }
 
 /* Koyu tema */
@@ -70,7 +80,10 @@
   --star-fill: #c19a7b;
   --star-empty: #4a3f36;
   --on-accent: #1d1712; /* açık kum üzerine koyu yazı */
-  --shadow: 0 10px 28px -18px rgba(0, 0, 0, 0.8);
+  --shadow: 0 16px 34px -20px rgba(0, 0, 0, 0.65),
+    0 2px 8px -3px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 22px 44px -20px rgba(0, 0, 0, 0.7),
+    0 4px 10px -3px rgba(0, 0, 0, 0.45);
   --rule: #3d352e;
   color-scheme: dark;
 }
