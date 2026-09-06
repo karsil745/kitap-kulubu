@@ -47,9 +47,12 @@ export default function HomePage() {
   return (
     <div>
       <section className="hero">
-        <div className="hero-cover">
-          {heroBook &&
-            (botm ? (
+        {/* Kapak yokken sarmalayıcı da basılmaz: boş bir esnek öge, `gap`
+            kadar hayalet bir girinti bırakıp metni bölüm başlıklarından
+            farklı bir sol kenara itiyordu. */}
+        {heroBook && (
+          <div className="hero-cover">
+            {botm ? (
               <Link to={`/kitap/${heroBook.id}`} className="hero-book">
                 <Cover book={heroBook} />
               </Link>
@@ -58,8 +61,9 @@ export default function HomePage() {
               <Link to="/oylama" className="hero-book hero-book-tentative">
                 <Cover book={heroBook} />
               </Link>
-            ))}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* Kapak bu animasyona dahil değil, olduğu yerde durur. */}
         <div className={heroGirisi ? "hero-text hero-giris" : "hero-text"}>
@@ -118,15 +122,18 @@ export default function HomePage() {
               </div>
             </>
           )}
+
+          {/* Ziyaretçi bandı hero'nun İÇİNDE duruyor: dışarıdayken hero ile
+              geçmiş bölümünün arasına üçüncü bir yüzey giriyor ve ayrı bir
+              bölüm gibi okunuyordu (PLAN-ANA-SAYFA-SADELESTIRME Adım 1). */}
+          {!currentUser && (
+            <div className="cta-banner">
+              Kulübe katıl, kendi kitaplarını öner!{" "}
+              <Link to="/giris">Giriş yap →</Link>
+            </div>
+          )}
         </div>
       </section>
-
-      {!currentUser && (
-        <div className="cta-banner">
-          Kulübe katıl, kendi kitaplarını öner!{" "}
-          <Link to="/giris">Giriş yap →</Link>
-        </div>
-      )}
 
       {/* Sayfanın hikâyesi: "bu ay ne okuyoruz → bugüne kadar neler okuduk"
           → sessiz kapanış. */}

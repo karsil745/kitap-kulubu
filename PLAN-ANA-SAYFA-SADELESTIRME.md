@@ -1,9 +1,8 @@
 # PLAN — Ana sayfayı sadeleştirme
 
 **Karar tarihi:** 2026-08-15
-**Durum:** Adım 2, 4 ve 5 **uygulandı** (2026-08-29). Adım 1 ve 3 (hero'nun ilk
-perdeyi tek başına alması, şeridin künye gibi tek satıra inmesi) hâlâ bekliyor —
-ikisi de görerek karar verilecek CSS işi.
+**Durum:** **Tamamlandı.** Adım 2, 4 ve 5 → 2026-08-29; Adım 1 ve 3 →
+2026-09-06 (bkz. adımların altındaki uygulama notları).
 **İlgili:** [PLAN-ANA-SAYFA-KULUP-SERIDI.md](PLAN-ANA-SAYFA-KULUP-SERIDI.md) (şeridi ekleyen plan — geri alınmıyor, küçültülüyor)
 
 ## Sorun
@@ -32,7 +31,7 @@ Beş bölüm → **üç bölüm**, net bir ağırlık sırasıyla:
 
 ## Adımlar
 
-### Adım 1 — Hero ilk perdeyi tek başına alsın
+### Adım 1 — Hero ilk perdeyi tek başına alsın ✅ UYGULANDI (2026-09-06)
 Hero'nun altındaki her şey ekranın altında kalsın; açılışta göz sadece ayın
 kitabını ve buluşmayı görsün.
 
@@ -42,12 +41,30 @@ kitabını ve buluşmayı görsün.
 - Ziyaretçiye görünen "Kulübe katıl" bandı hero'nun **içine** girsin, ayrı bir
   şerit olarak ikinci bir bölüm gibi durmasın.
 
+> **Uygulama notu (2026-09-06):**
+> - `min-height` **78vh olmadı**, `min(56vh, 470px)` oldu. 78vh kart içinde
+>   kısa metinli aylarda kocaman bir ölü boşluk bırakıyor; bu yüzden bir ara
+>   `min-height: 0`'a çekilmiş ve hero diğer bölümlerle aynı ağırlığa düşmüştü.
+>   Ölçülü taban değerde hero ilk perdenin yaklaşık üçte ikisini alıyor,
+>   altındaki bölüm sadece **ucundan görünüyor** — bu bilerek bırakıldı,
+>   kaydırma olduğunu söyleyen tek işaret o.
+> - Kapak yokken (oylama sürerken aday da yoksa) `.hero-cover` artık hiç
+>   basılmıyor: boş esnek öge `gap` kadar hayalet girinti bırakıp hero metnini
+>   sayfanın geri kalanından farklı bir sol kenara itiyordu.
+> - Buluşma satırı **yerinde kaldı**, sadece tonu (`--muted` → `--ink-2`),
+>   puntosu ve üstündeki boşluk büyütüldü. CTA'nın üstüne almak tartışıldı,
+>   sıralamayı bozmamak için elendi.
+> - Ziyaretçi bandı hero'nun içine girdi ve kart içinde ikinci bir dolgu yüzeyi
+>   olmasın diye kılcal çizgiyle ayrılan sessiz bir kapanış satırına dönüştü.
+>   `.cta-banner` başka sayfalarda da kullanılıyor, o yüzden yeni görünüm
+>   `.hero .cta-banner` altında kapsanmış durumda.
+
 ### Adım 2 — "En çok önerilenler" kaldırılsın ✅ UYGULANDI (2026-08-29)
 Üç kitap kartı yer kaplıyor ve `/kitaplar` sayfasının kopyası. Hero'daki
 "Kitap öner →" bağlantısı aynı yere zaten götürüyor. Bölüm tamamen silinir,
 `BookCard` importu ve `popular` hesabı `HomePage`'ten çıkar.
 
-### Adım 3 — Okuma şeridi tek satıra insin
+### Adım 3 — Okuma şeridi tek satıra insin ✅ UYGULANDI (2026-09-06)
 `ReadingHistory` kalsın (kulübün hafızasını göstermek değerliydi) ama bölüm
 gibi değil **künye gibi** dursun:
 
@@ -55,6 +72,32 @@ gibi değil **künye gibi** dursun:
 - Sayaç ("6 kitap · Şubat 2026'dan beri") ve kapak şeridi tek satırda.
 - Ay etiketleri (TEMMUZ 2026, HAZİRAN 2026 …) ayrı satırlarda dökülmesin;
   yatay kaydırılan tek şerit olsun.
+
+> **Uygulama notu (2026-09-06):**
+> - Bölüm `.gecmis-bolum` sınıfını aldı; `.section-head` sitenin her yerinde
+>   kullanıldığı için küçültme bu kapsam altında yapıldı. Başlık `--fs-h2`
+>   (2.15rem'e kadar) yerine 1.18rem: hero'nun yanında ikinci bir "büyük
+>   başlık" olmaktan çıktı.
+> - Sayaç `.section-head`'in içine, başlığın alt satırına taşındı. Eski
+>   `-1.3rem` negatif margin'i gitti.
+> - **Kapaklardaki kart kaldırıldı** — kart dilinden bilinçli sapma. "Her blok
+>   bir kart" kuralında blok şeridin kendisi; kapak başına kart verilince yan
+>   yana 7-8 beyaz yüzey diziliyor ve şerit künye olmaktan çıkıyordu. Kapak
+>   104×156 → 78×117 küçüldü, zemin/gölge yerine tek ince gölge kaldı.
+> - Ay etiketleri duruyor ama sesi kısıldı (700 → 500 ağırlık, daha küçük
+>   punto, daha dar harf aralığı). Silinmedi: kulübün hafızasında "ne zaman"
+>   bilgisi asıl değerli olan.
+> - Şeridin sağ kenarına `mask-image` ile yumuşak bitiş: kaydırılabildiği
+>   görünsün, çerçeve eklenmesin.
+> - **Yan karar:** hero bir kart olduğu için metni kartın iç boşluğu kadar
+>   içeriden başlıyordu, kartsız bölümler ise tuvalin kenarından — sayfada iki
+>   sol kenar vardı. `--kart-ic-yatay` jetonu açıldı, ana sayfadaki kartsız
+>   bölüm de aynı yatay boşluğu alıyor. Dikey ritim de `--bolum-arasi` tek
+>   jetonuna bağlandı (eskiden 1.2 / 2 / 3 / 3.5rem diye dağılmıştı).
+> - **Günün Sözü karttan çıkarıldı**: hero + şerit + alıntı üç ayrı beyaz
+>   yüzeydi, en sessiz olması gereken öge en alttaki en parlak kutuydu. Zemin
+>   ve gölge gitti, üstündeki kural çizgisi geri geldi. Ortalanmış kalıyor —
+>   sola çekmek düşünüldü, kapanış jesti olarak ortada durması korundu.
 
 ### Adım 4 — Aktivite akışı ana sayfadan çıksın ✅ UYGULANDI (2026-08-29)
 `<ActivityFeed />` `HomePage`'ten kaldırılır. Bileşen **silinmez**, yeni evine

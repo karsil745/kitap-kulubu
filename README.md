@@ -67,5 +67,5 @@ tartışmaktan kurtarır.
 | `PLAN-ANIMASYON.md` | uygulandı, testleri bekliyor |
 | `PLAN-KATILIM.md` | uygulandı |
 | `PLAN-HAREKET.md` | kapandı — Adım 1 uygulandı, Adım 2 geri alındı, Adım 3 `PLAN-ANIMASYON.md`'ye taşındı |
-| `PLAN-ANA-SAYFA-SADELESTIRME.md` | Adım 2·4·5 uygulandı; Adım 1 ve 3 bekliyor |
+| `PLAN-ANA-SAYFA-SADELESTIRME.md` | uygulandı (beş adım da) |
 | `PLAN-ODALAR.md` | taslak |

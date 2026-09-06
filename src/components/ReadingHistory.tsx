@@ -90,27 +90,30 @@ export default function ReadingHistory() {
     .join(" ");
 
   return (
-    <section className="section" ref={ref}>
+    <section className="section gecmis-bolum" ref={ref}>
+      {/* Başlık ve sayaç tek künye bloğu: sayaç eskiden negatif margin ile
+          başlığın altına çekiliyordu, artık aynı satırın parçası. */}
       <div className="section-head">
-        <h2>Şimdiye kadar okuduklarımız</h2>
+        <div className="gecmis-kunye">
+          <h2>Şimdiye kadar okuduklarımız</h2>
+          {/* Sayılar kendi elemanlarında; aradaki ayraçlar ve tarih metni
+              sabit. "…'ten beri" bir tarih, sayı değil — canlandırılmıyor. */}
+          <p className="hint gecmis-sayac">
+            <Sayac deger={okunanlar.length} oyna={gorundu} /> kitap
+            {sayfaBilinen && (
+              <>
+                {" · "}
+                <Sayac deger={sayfaToplam} oyna={gorundu} /> sayfa
+              </>
+            )}
+            {" · "}
+            {monthSinceLabel(ilkAy)}
+          </p>
+        </div>
         <Link to="/takvim" className="link-more">
           Tümü →
         </Link>
       </div>
-
-      {/* Sayılar kendi elemanlarında; aradaki ayraçlar ve tarih metni sabit.
-          "…'ten beri" bir tarih, sayı değil — canlandırılmıyor. */}
-      <p className="hint gecmis-sayac">
-        <Sayac deger={okunanlar.length} oyna={gorundu} /> kitap
-        {sayfaBilinen && (
-          <>
-            {" · "}
-            <Sayac deger={sayfaToplam} oyna={gorundu} /> sayfa
-          </>
-        )}
-        {" · "}
-        {monthSinceLabel(ilkAy)}
-      </p>
 
       {/* Geçmiş bir akış, liste değil: dikey ızgara yerine yatay şerit. */}
       <div className={seritSinifi}>

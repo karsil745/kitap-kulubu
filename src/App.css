@@ -398,16 +398,16 @@
   flex: 1;
   min-width: 0;
 }
-/* Dolgulu hap yerine: vurgu renginde versal künye satırı, üstünde kısa kural */
+/* Dolgulu hap yerine sessiz versal künye satırı. Bir zamanlar vurgu renginde
+   ve üstünde kural çizgisi vardı; kart dili ikisini de siliyordu, ölü kalan
+   bildirimler buradan kaldırıldı (2026-09-06). */
 .hero-eyebrow {
   display: block;
-  color: var(--accent);
+  color: var(--muted);
   text-transform: uppercase;
   letter-spacing: var(--track-label);
   font-size: var(--fs-label);
   font-weight: 700;
-  padding-top: 0.85rem;
-  border-top: 1px solid var(--accent);
   margin: 0 0 1.4rem;
   width: fit-content;
   max-width: 100%;
@@ -1064,11 +1064,13 @@ textarea {
   background: var(--surface);
   color: var(--ink);
 }
-/* Ana sayfadaki tek satırlık buluşma hatırlatması */
+/* Ana sayfadaki buluşma satırı. Hero'nun ikinci mesajı ("ne zaman
+   buluşuyoruz") bu satır; dipnot ölçüsünde kalmasın diye tonu ve üstündeki
+   nefes bir basamak yukarı alındı (2026-09-06). */
 .hero-meeting {
-  margin: 1.1rem 0 0;
-  color: var(--muted);
-  font-size: var(--fs-meta);
+  margin: 1.5rem 0 0;
+  color: var(--ink-2);
+  font-size: 0.95rem;
 }
 
 /* ---- Okuma ilerlemesi ---- */
@@ -1817,16 +1819,22 @@ textarea {
 /* ---- Ana sayfa: "Şimdiye kadar okuduklarımız" şeridi ---- */
 /* Kart yok, çerçeve yok, zemin yok: sadece kapaklar ve altlarında ay etiketi.
    Taşınca yatay kayar — geçmiş bir akış, liste değil. */
+/* Sayaç başlığın alt satırı: eskiden ayrı bir paragraftı ve negatif margin ile
+   yerine çekiliyordu, artık künye bloğunun içinde duruyor. */
 .gecmis-sayac {
-  margin: -1.3rem 0 1.6rem;
+  margin: 0.25rem 0 0;
 }
+/* `overflow-x: auto` verilince dikey eksen de `visible` olmaktan çıkıp `auto`
+   oluyor ve şeridin sağında işe yaramaz bir dikey kaydırma çubuğu beliriyordu.
+   Dikey eksen kapatıldı; hover'daki 4px kalkma kırpılmasın diye üstte pay var. */
 .gecmis-serit {
   display: flex;
   gap: 1.5rem;
   overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
-  padding-bottom: 0.5rem;
+  padding: 0.4rem 0 0.5rem;
 }
 .gecmis-oge {
   flex: 0 0 auto;
@@ -2167,12 +2175,17 @@ textarea {
 }
 
 /* Hero artık bir kart */
+/* Yükseklik: temel kuraldaki 66vh kart içinde kısa metinlerde koca bir ölü
+   boşluk bırakıyordu, bu yüzden bir ara 0'a çekilmişti — o sefer de hero
+   sayfadaki diğer bölümlerle aynı ağırlığa düştü. Ölçülü bir taban değer
+   ikisinin arası: kart dolu görünür, altındaki bölüm ilk perdeye girmez
+   (PLAN-ANA-SAYFA-SADELESTIRME Adım 1). */
 .hero {
   background: var(--surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  padding: clamp(1.5rem, 3vw, 2.6rem);
-  min-height: 0;
+  padding: clamp(1.9rem, 3.4vw, 3.1rem) var(--kart-ic-yatay);
+  min-height: min(56vh, 470px);
   margin-top: 1.2rem;
   gap: clamp(1.5rem, 4vw, 3.2rem);
 }
@@ -2195,17 +2208,9 @@ textarea {
      genişliğini de düşürür; esnek kutu ancak böyle daraltabiliyor. */
   overflow-wrap: anywhere;
 }
-/* Etiket: chip değil, sessiz versal mikro-etiket. Kitabın adıyla dikkat
-   yarışmaması için vurgu rengi değil --muted. */
+/* Etiket: chip değil, sessiz versal mikro-etiket (temel kural zaten öyle
+   veriyor, burada sadece kart içindeki alt boşluğu ayarlıyoruz). */
 .hero-eyebrow {
-  border-top: none;
-  padding: 0;
-  border-radius: 0;
-  background: none;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: var(--track-label);
-  font-size: var(--fs-label);
   margin-bottom: 1.1rem;
 }
 /* Yazar adı serif italik kalıyor — dergi künyesi hissi buradan geliyor */
@@ -2221,12 +2226,12 @@ textarea {
   color: var(--ink-2);
   margin: 0.4rem 0 1.1rem;
 }
-/* Merdivenin en soluk basamağı. Planda `--ink-3` yazıyordu ama projede öyle bir
-   jeton yok; merdivenin istediği "en açık okunur ton" --muted (kart üstünde
-   5.6:1, WCAG AA). */
+/* Merdivenin anlatı basamağı: `--ink-3` uzun metin için ayrılmış jeton
+   (kart üstünde 6.0:1). Eskiden --muted idi, ama etiket ve buluşma satırı da
+   --muted olduğu için üç ayrı basamak aynı tona düşüyordu. */
 .hero-desc {
-  color: var(--muted);
-  margin-bottom: 1.6rem;
+  color: var(--ink-3);
+  margin-bottom: 1.8rem;
 }
 /* Kitap belli değilken: "Şu an önde:" soluk kalır, kitabın adı koyulaşır */
 .hero-leader-name {
@@ -2263,34 +2268,38 @@ textarea {
   padding: 0.75rem 0.2rem 0.2rem;
 }
 
-/* Geçmiş okumalar şeridi: her kapak kendi kartında */
+/* Geçmiş okumalar şeridi: kapaklar KART DEĞİL (2026-09-06).
+   Kart dili "her blok bir kart" der, ama burada blok şeridin kendisi; her
+   kapağa kart verilince yan yana 7-8 beyaz yüzey diziliyor ve şerit künye
+   olmaktan çıkıp hero'yla ağırlık yarışına giriyordu. Kapağın kendisi zaten
+   bir nesne — zemine ihtiyacı yok. */
 .gecmis-oge {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  padding: 0.65rem;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 .gecmis-kapak {
-  border-radius: var(--radius-sm);
-  width: 104px;
-  height: 156px;
+  border-radius: 1px var(--radius-sm) var(--radius-sm) 1px;
+  width: 78px;
+  height: 117px;
+  /* Kart kalkınca kapağı kâğıt zeminden ayıran tek şey bu ince gölge */
+  box-shadow: 0 6px 14px -8px rgba(40, 28, 20, 0.5);
 }
-.gecmis-ay {
-  padding-left: 0.1rem;
+.gecmis-oge:hover {
+  box-shadow: none;
 }
 
-/* Günün sözü de bir kart; üstündeki kural çizgisi kalkıyor */
+/* Günün sözü kart değil, sayfanın kapanış dipnotu (2026-09-06).
+   Hero + şerit + alıntı üç ayrı beyaz yüzeydi; en sessiz olması gereken öge
+   en alttaki en parlak kutuydu. Zemin kalktı, kural çizgisi geri geldi. */
 .quote-of-day {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
   max-width: 620px;
-  margin: 3.5rem auto 1rem;
-  padding: 1.6rem 1.8rem 1.7rem;
+  margin: calc(var(--bolum-arasi) * 1.15) auto 0.5rem;
+  padding: 0;
 }
 .quote-of-day::before {
-  display: none;
+  display: block;
 }
 .quote-of-day-label {
   text-transform: none;
@@ -2304,6 +2313,98 @@ textarea {
   border-left: none;
   border-radius: var(--radius-lg);
   padding: 0.85rem 1.2rem;
+}
+
+/* =====================================================================
+   ANA SAYFA — görsel düzen (2026-09-06)
+   PLAN-ANA-SAYFA-SADELESTIRME Adım 1 ve Adım 3. İçerik ve işlev aynı;
+   değişen tek şey ağırlık sırası, dikey ritim ve sol kenar hizası.
+   ===================================================================== */
+
+/* Ziyaretçi bandı artık hero kartının İÇİNDE. Kartın içinde ikinci bir dolgu
+   yüzeyi göz yorar; bandı hero'nun kapanış satırı yapan kılcal bir çizgi
+   yeter. */
+.hero .cta-banner {
+  background: none;
+  border-radius: 0;
+  border-top: 1px solid var(--rule);
+  padding: 0.9rem 0 0;
+  margin-top: 1.8rem;
+  font-size: var(--fs-caption);
+  color: var(--muted);
+}
+
+/* İkincil hero bağlantısı butonla aynı dili konuşsun: kart dilinde butonlar
+   cümle düzenine geçmişti, yanındaki bağlantı versal kalmıştı. */
+.hero-vote-link {
+  text-transform: none;
+  letter-spacing: 0.005em;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* --- Okuma şeridi: bölüm değil künye (Adım 3) --- */
+/* Sol eksen: hero bir kart olduğu için metni kartın iç boşluğu kadar içeride
+   başlıyor. Kartsız bölümlere aynı yatay boşluk veriliyor ki sayfadaki bütün
+   metin tek bir düşey hatta otursun. */
+/* (Günün Sözü bu eksene katılmaz: ortalanmış kapanış dipnotu olarak kalıyor.) */
+.gecmis-bolum {
+  padding-inline: var(--kart-ic-yatay);
+  margin-top: var(--bolum-arasi);
+}
+/* Başlık + sayaç tek künye bloğu; sayacı yerine çeken negatif margin gitti. */
+.gecmis-kunye {
+  min-width: 0;
+}
+.gecmis-bolum .section-head h2 {
+  font-size: 1.18rem;
+  letter-spacing: -0.01em;
+}
+.gecmis-bolum .gecmis-sayac {
+  margin: 0.25rem 0 0;
+  font-size: var(--fs-caption);
+}
+/* Ay etiketleri: 7-8 tane yan yana versal bold satır gürültüydü. Bilgi
+   duruyor, sesi kısıldı. */
+.gecmis-bolum .gecmis-ay {
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  font-size: 0.66rem;
+}
+.gecmis-bolum .gecmis-serit {
+  gap: 1.15rem;
+  /* Kaydırılabilir şerit sağ kenarda sertçe kesiliyordu; yumuşak bitiş hem
+     devamı olduğunu söylüyor hem çerçeve eklemiyor. */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 calc(100% - 3rem),
+    transparent
+  );
+  mask-image: linear-gradient(to right, #000 calc(100% - 3rem), transparent);
+}
+
+/* Ara ekran (tablet / dar dizüstü): tek kırılma noktası 640px'ti, arada hero
+   satır düzeninde kalıp kapak metni sıkıştırıyordu. */
+@media (max-width: 900px) {
+  .hero {
+    min-height: min(52vh, 400px);
+    gap: 1.8rem;
+  }
+  .hero-book img {
+    width: clamp(170px, 24vw, 220px);
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    min-height: 0;
+  }
+  /* Dar ekranda kart/bölüm kenar farkı zaten göze batmıyor; yatay yer
+     kıymetli, fazladan girinti şeridi daraltıyor. */
+  .gecmis-bolum {
+    padding-inline: 0;
+  }
 }
 
 @media (max-width: 640px) {
@@ -2531,6 +2632,9 @@ textarea {
 .hero-giris > *:nth-child(4) { animation-delay: 180ms; }
 .hero-giris > *:nth-child(5) { animation-delay: 240ms; }
 .hero-giris > *:nth-child(6) { animation-delay: 300ms; }
+/* Ziyaretçi bandı hero'nun içine girince 7. çocuk oldu; gecikmesiz kalıp
+   sıranın önüne geçmesin. */
+.hero-giris > *:nth-child(n + 7) { animation-delay: 360ms; }
 
 /* 2 · "Şimdiye kadar okuduklarımız" şeridi görünürken açılır.
    `serit-hazir` gizler (JS ekler), `serit-acilir` oynatır; animasyon kendi

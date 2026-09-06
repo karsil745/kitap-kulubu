@@ -45,6 +45,13 @@
 
   --canvas: 1180px; /* sayfa tuvali */
 
+  /* Ana sayfanın dikey ritmi. Bölüm araları eskiden 1.2 / 2 / 3 / 3.5rem
+     diye rastgele dağılmıştı; hepsi bu tek ölçeğe bağlandı. */
+  --bolum-arasi: clamp(2.75rem, 5vw, 4.25rem);
+  /* Kart içi yatay boşluk. Ana sayfadaki kartsız bölümler de bunu kullanıyor:
+     sayfadaki bütün metin tek bir sol eksende başlasın. */
+  --kart-ic-yatay: clamp(1.5rem, 3vw, 2.6rem);
+
   /* Başlık ölçeği — ekranla birlikte büyür */
   --fs-display: clamp(2.6rem, 5.4vw, 4.1rem);
   --fs-h1: clamp(2rem, 3.6vw, 2.9rem);
