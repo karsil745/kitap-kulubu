@@ -1903,6 +1903,9 @@ textarea {
    oluyor ve şeridin sağında işe yaramaz bir dikey kaydırma çubuğu beliriyordu.
    Dikey eksen kapatıldı; hover'daki 4px kalkma kırpılmasın diye üstte pay var. */
 .gecmis-serit {
+  /* Kapak genişliği ekranla ölçekleniyor. Sabit 78px'te geniş ekranda yedi
+     kapak tuvalin ancak yarısını dolduruyor, sağda ölü alan kalıyordu. */
+  --gecmis-kapak: clamp(88px, 8.5vw, 132px);
   display: flex;
   gap: 1.5rem;
   overflow-x: auto;
@@ -1911,8 +1914,13 @@ textarea {
   scroll-snap-type: x proximity;
   padding: 0.4rem 0 0.5rem;
 }
+/* Kapaklar sığdıkları sürece kalan boşluğu paylaşıp satırı doldurur
+   (tavana kadar); sığmadıklarında büyüme devreye girmez ve şerit her zamanki
+   gibi yatay kayar. `min-width` tabanı korur, hiçbir zaman ezilmezler. */
 .gecmis-oge {
-  flex: 0 0 auto;
+  flex: 1 1 var(--gecmis-kapak);
+  min-width: var(--gecmis-kapak);
+  max-width: 132px;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
@@ -2122,9 +2130,18 @@ textarea {
   .hero-book {
     transform: rotateY(-8deg);
   }
+  /* Kapak alta iniyor ama METİN ortalanmıyor: ortalı bir gövde paragrafı
+     (açıklama tek başına 390px) okunmuyordu, üstelik puan satırı esnek
+     olduğu için sola yaslı kalıp aynı kartta iki hiza yaratıyordu. */
   .detail-head {
     flex-direction: column;
-    text-align: center;
+    text-align: left;
+  }
+  .detail-cover {
+    align-self: center;
+  }
+  .detail-cover img {
+    width: min(52vw, 190px);
   }
   /* Bağlantılar alt sekme çubuğuna taşındı; üstte sadece marka ve hesap
      kalıyor, böylece üst menü tek satıra sığıyor. */
@@ -2134,6 +2151,23 @@ textarea {
   .user-chip-name {
     display: none;
   }
+  /* Alt etiket de aynı gerekçeyle gider: 320px'te "KİTAP KULÜBÜ" iki satıra
+     düşüp markayı 202px'e çıkarıyor, hesap bloğu üst menüden taşıyor ve
+     sayfa 42px yatay kayıyordu. Kimliği marka adı zaten taşıyor. */
+  .brand-tagline {
+    display: none;
+  }
+  /* Marka bloğu daralabilsin: `nowrap` verilince kutusundan 29px taşıp tema
+     düğmesinin üstüne biniyordu. Taşma yerine kısalma. */
+  .brand,
+  .brand-lockup {
+    min-width: 0;
+  }
+  .brand-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .navbar {
     flex-wrap: nowrap;
     gap: 0.6rem;
@@ -2141,6 +2175,12 @@ textarea {
   }
   .nav-user {
     margin-left: auto;
+    flex-shrink: 0;
+  }
+  /* "Giriş Yap" iki satıra bölünüp butonu 64px yapıyordu */
+  .nav-user .btn-primary,
+  .nav-user .btn-ghost {
+    white-space: nowrap;
   }
   .tabbar {
     display: flex;
@@ -2162,8 +2202,21 @@ textarea {
   .section {
     margin-top: 3rem;
   }
+  /* `auto-fill minmax(205px)` ile iki sütun ancak ~470px'ten sonra
+     oluşuyordu; bütün telefonlar tek sütunda kalıyor, kapak 309px'e şişip
+     on kitaplık ızgara 6250px uzunluğa çıkıyordu. Telefonda raf iki sütun.
+     640px'te sonuç zaten iki sütundu, o genişlikte hiçbir şey değişmiyor. */
   .book-grid {
-    gap: 1.8rem 1.2rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 0.9rem;
+  }
+  /* Dokunma hedefi: hap butonlar 35–40px'e düşüyordu */
+  .btn-primary,
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
   }
   .detail-head {
     gap: 1.8rem;
@@ -2353,8 +2406,10 @@ textarea {
 }
 .gecmis-kapak {
   border-radius: 1px var(--radius-sm) var(--radius-sm) 1px;
-  width: 78px;
-  height: 117px;
+  /* Genişliği artık öge belirliyor; oran sabit kalıyor */
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
   /* Kart kalkınca kapağı kâğıt zeminden ayıran tek şey bu ince gölge */
   box-shadow: 0 6px 14px -8px rgba(40, 28, 20, 0.5);
 }
@@ -2856,6 +2911,26 @@ textarea {
   .kart,
   .approval-rows {
     padding: 0.2rem 0.9rem;
+  }
+}
+
+/* Çok dar telefonlar (320–400px). Üst menüde marka + tema düğmesi + hesap
+   butonu 300px yer istiyor, 320px'te kullanılabilir alan 270px: marka adı
+   kısalıyor ya da taşıyordu. Birkaç piksel her üç ögeden kırpılıyor. */
+@media (max-width: 400px) {
+  .brand-name {
+    font-size: 1.24rem;
+  }
+  .brand,
+  .brand-lockup {
+    gap: 8px;
+  }
+  .nav-user {
+    gap: 0.65rem;
+  }
+  .nav-user .btn-primary,
+  .nav-user .btn-ghost {
+    padding-inline: 0.9rem;
   }
 }
 
