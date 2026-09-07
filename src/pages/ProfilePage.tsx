@@ -54,12 +54,15 @@ export default function ProfilePage() {
   const wantBooks = books.filter((b) => statusOf(b.id) === "want");
 
   return (
-    <div className="section">
+    // `profil` sınıfı yalnızca kapsam içindir: bu sayfanın görsel kuralları
+    // (.section-head, .empty, .chip, .reading-goal …) sitenin geri kalanında
+    // da kullanılan sınıflara dokunuyor, hepsi bu kapsamın altında kalıyor.
+    <div className="section profil">
       <div className="profile-head">
         <div className="profile-avatar">
           <Avatar user={currentUser} size={90} />
         </div>
-        <div>
+        <div className="profile-kunye">
           <h1>{currentUser.name}</h1>
           <p className="hint">{currentUser.bio}</p>
           <p className="book-recs">{myBooks.length} kitap önerdin</p>

@@ -38,37 +38,41 @@ export default function ReadingGoal() {
     <section className="reading-goal">
       <h2>{yil} okuma hedefi</h2>
 
-      {hedef && (
-        <>
-          <p className="reading-goal-summary">
-            {okunan >= hedef
-              ? `Hedefi tuttun — ${okunan} kitap 🎉`
-              : `${okunan} / ${hedef} kitap`}
-          </p>
-          <span className="progress-track" aria-hidden="true">
-            <span
-              className="progress-fill"
-              style={{ width: `${Math.min(100, Math.round((okunan / hedef) * 100))}%` }}
-            />
-          </span>
-        </>
-      )}
+      {/* Başlık dışarıda, gövde kendi yüzeyinde: sayfanın geri kalanındaki
+          "bölüm başlığı + içerik kartı" kalıbıyla aynı olsun diye. */}
+      <div className="reading-goal-govde">
+        {hedef && (
+          <>
+            <p className="reading-goal-summary">
+              {okunan >= hedef
+                ? `Hedefi tuttun — ${okunan} kitap 🎉`
+                : `${okunan} / ${hedef} kitap`}
+            </p>
+            <span className="progress-track" aria-hidden="true">
+              <span
+                className="progress-fill"
+                style={{ width: `${Math.min(100, Math.round((okunan / hedef) * 100))}%` }}
+              />
+            </span>
+          </>
+        )}
 
-      <div className="progress-input">
-        <label htmlFor="reading-goal-input">
-          {hedef ? "Hedefi değiştir" : "Bu yıl kaç kitap okumak istersin?"}
-        </label>
-        <input
-          id="reading-goal-input"
-          type="number"
-          min={1}
-          max={1000}
-          placeholder={hedef ? String(hedef) : "ör. 12"}
-          value={taslak}
-          onChange={(e) => setTaslak(e.target.value)}
-          onBlur={kaydet}
-          onKeyDown={handleKeyDown}
-        />
+        <div className="progress-input">
+          <label htmlFor="reading-goal-input">
+            {hedef ? "Hedefi değiştir" : "Bu yıl kaç kitap okumak istersin?"}
+          </label>
+          <input
+            id="reading-goal-input"
+            type="number"
+            min={1}
+            max={1000}
+            placeholder={hedef ? String(hedef) : "ör. 12"}
+            value={taslak}
+            onChange={(e) => setTaslak(e.target.value)}
+            onBlur={kaydet}
+            onKeyDown={handleKeyDown}
+          />
+        </div>
       </div>
     </section>
   );

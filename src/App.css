@@ -2666,6 +2666,148 @@ textarea {
   padding: 0.4rem 1.2rem;
 }
 
+/* =====================================================================
+   PROFİL SAYFASI — görsel düzen (2026-09-07)
+   Buradaki her kural `.profil` kapsamının altında: .section-head, .empty,
+   .chip, .reading-goal, .book-grid gibi sınıflar sitenin başka yerlerinde
+   de kullanılıyor, hiçbiri dışarı sızmasın.
+   ===================================================================== */
+
+/* --- Künye --- */
+/* Kart iç boşluğu sitenin ölçüsüne geliyor: künye 19/22px, yorum listesi
+   19px, bölüm başlıkları tuval kenarındaydı — sayfada üç ayrı sol kenar
+   vardı, hepsi tek eksene oturuyor. */
+.profil .profile-head {
+  padding: 1.5rem var(--kart-ic-yatay);
+  gap: 1.6rem;
+}
+.profil .profile-kunye {
+  min-width: 0;
+}
+/* 46px'lik ad 90px'lik avatarın yanında künyeyi eziyordu */
+.profil .profile-kunye h1 {
+  margin: 0;
+  font-size: clamp(1.7rem, 3vw, 2.2rem);
+}
+/* Tanıtım cümlesi: gövde metni, künye satırı değil. Eskiden `.hint` ile
+   0.9rem/--muted idi ve altındaki istatistikle aynı tona düşüyordu. */
+.profil .profile-kunye .hint {
+  margin: 0.5rem 0 0;
+  color: var(--ink-2);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 56ch;
+}
+/* "N kitap önerdin" bir cümle değil sayaç — versal mikro-etiket */
+.profil .book-recs {
+  margin-top: 0.75rem;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  color: var(--muted);
+}
+
+/* --- Bölüm başlıkları ve ritim --- */
+/* Sayfada h1'in ardından sekiz ile dokuz tane --fs-h2 (34px) başlık vardı;
+   hiçbir bölüm diğerinden ayrışmıyordu. */
+.profil .section-head h2,
+.profil .reading-goal h2 {
+  font-size: 1.4rem;
+  margin: 0;
+}
+/* Okuma hedefi başlığını `.section-head` sarmıyor, bu yüzden tek başına
+   kılcal çizgisiz kalıyordu — sekiz başlıktan yedisi bir dilde, biri
+   başka. Aynı görünüm JSX'e dokunmadan burada veriliyor. */
+.profil .reading-goal {
+  margin: 0;
+  border-top: 1px solid var(--rule);
+  padding-top: 0.8rem;
+}
+.profil .reading-goal h2 {
+  margin-bottom: 1.1rem;
+}
+/* Beş blok, beş farklı boşluk ölçüsü vardı (1.5 / 1.8 / 2 / 2.2 / 2.5rem).
+   Bölüm arası tek ölçüde; başlık ile içeriği arası ondan dar. */
+.profil .section-head {
+  margin-bottom: 1.1rem;
+}
+/* Blokların kendi alt boşlukları sıfırlanıp ritim tek yerden veriliyor;
+   yoksa 2rem'lik eski alt margin'ler bunun üstüne biniyor. */
+.profil > * {
+  margin-bottom: 0;
+}
+.profil > * + * {
+  margin-top: 2.4rem;
+}
+/* Başlık kendi içeriğine yapışık kalır */
+.profil .section-head + * {
+  margin-top: 0;
+}
+
+/* --- Kart tutarlılığı --- */
+/* Sayfa kartlı/kartsız arasında gidip geliyordu: künye kart, onay listesi
+   kart, yorum listesi kart; okuma hedefi, rozetler, avatar seçici kartsız.
+   Okuma hedefi ve rozetler de birer içerik bloğu — Kitaplar sayfasındaki
+   `.book-tools` kalıbı (başlık kartın dışında, içerik içinde).
+   Kitap ızgaraları bilerek kartsız: kartlardan oluşuyorlar. */
+.profil .reading-goal-govde,
+.profil .badge-seal-grid,
+.profil .review-list.kart,
+.profil .approval-rows {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 1.3rem var(--kart-ic-yatay);
+  margin-bottom: 0;
+}
+/* Rozet ızgarası kartın içinde nefes alsın */
+.profil .badge-seal-grid {
+  gap: 1.5rem 1.4rem;
+}
+/* Dikey dolgu 0.2rem'di: ilk yorum kartın üst kenarına yapışıyordu */
+.profil .review-list.kart {
+  gap: 1.2rem;
+}
+.profil .approval-rows {
+  max-width: none;
+}
+
+/* --- Avatar satırı --- */
+/* Dolgulu hap buton ile altı çizili versal çip yan yana iki ayrı kontrol
+   dili konuşuyordu. Çip burada çerçeveli bir hap olur; `active` durumu
+   (Google fotoğrafı kullanımda) vurgu rengiyle korunuyor. */
+.profil .avatar-picker {
+  gap: 0.6rem;
+}
+.profil .avatar-picker .chip {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 0.62rem 1.1rem;
+  margin-right: 0;
+  text-transform: none;
+  letter-spacing: 0.005em;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.profil .avatar-picker .chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.profil .avatar-picker .chip.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* --- Boş durumlar --- */
+/* Yeni bir üyede sayfa beş kez "başlık + tek satır boş metin" oluyor;
+   1.5rem'lik dikey dolgu bunu boşluk denizine çeviriyordu. */
+.profil .empty {
+  padding: 0;
+  font-size: var(--fs-meta);
+}
+
 /* Giriş sayfası: ortada tek kart */
 .section.login {
   background: var(--surface);
