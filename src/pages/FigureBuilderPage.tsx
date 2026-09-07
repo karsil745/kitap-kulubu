@@ -118,7 +118,8 @@ export default function FigureBuilderPage() {
   );
   const [kaydediliyor, setKaydediliyor] = useState(false);
 
-  if (!currentUser) return <Navigate to="/giris" replace />;
+  if (!currentUser)
+    return <Navigate to="/giris" state={{ from: "/profil/figur" }} replace />;
 
   function alan<K extends keyof Figure>(key: K) {
     return (v: Figure[K]) => setDraft((d) => ({ ...d, [key]: v }));

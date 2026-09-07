@@ -74,7 +74,10 @@ export default function BookDetailPage() {
       {!currentUser && (
         <p className="hint detail-login-hint">
           Puan vermek, öneri yapmak ve alıntı eklemek için{" "}
-          <Link to="/giris">giriş yap</Link>.
+          <Link to="/giris" state={{ from: `/kitap/${book.id}` }}>
+            giriş yap
+          </Link>
+          .
         </p>
       )}
 

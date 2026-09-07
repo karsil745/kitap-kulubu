@@ -42,7 +42,8 @@ export default function ProfilePage() {
   }, [currentUser]);
 
   // Giriş yapılmadıysa giriş sayfasına yönlendir
-  if (!currentUser) return <Navigate to="/giris" replace />;
+  if (!currentUser)
+    return <Navigate to="/giris" state={{ from: "/profil" }} replace />;
 
   const myBooks = books.filter((b) =>
     b.recommendedBy.includes(currentUser.id)

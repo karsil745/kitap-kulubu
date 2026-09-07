@@ -113,9 +113,23 @@ export default function HomePage() {
                 birlikte okunacak.
               </p>
               <div className="hero-cta">
-                <Link to="/oylama" className="btn-primary">
-                  Oylamaya katıl →
-                </Link>
+                {/* Ziyaretçide sayfanın en büyük butonu doğrudan oylamaya
+                    götürüyordu; orada bütün düğmeler sönük olduğu için en
+                    güçlü çağrı iki tık sonra "önce giriş yap"la bitiyordu.
+                    Artık giriş adımından geçip oylamaya çıkıyor. */}
+                {currentUser ? (
+                  <Link to="/oylama" className="btn-primary">
+                    Oylamaya katıl →
+                  </Link>
+                ) : (
+                  <Link
+                    to="/giris"
+                    state={{ from: "/oylama" }}
+                    className="btn-primary"
+                  >
+                    Oylamaya katıl →
+                  </Link>
+                )}
                 <Link to="/kitaplar" className="hero-vote-link">
                   Kitap öner →
                 </Link>
@@ -129,7 +143,9 @@ export default function HomePage() {
           {!currentUser && (
             <div className="cta-banner">
               Kulübe katıl, kendi kitaplarını öner!{" "}
-              <Link to="/giris">Giriş yap →</Link>
+              <Link to="/giris" state={{ from: "/kitaplar" }}>
+                Giriş yap →
+              </Link>
             </div>
           )}
         </div>

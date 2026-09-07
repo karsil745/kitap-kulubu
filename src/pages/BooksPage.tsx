@@ -18,7 +18,7 @@ const SIRALAMALAR: { value: Siralama; label: string }[] = [
 
 // Kitaplar sayfası: arama + döneme göre filtreleme + sıralama + öneri formu.
 export default function BooksPage() {
-  const { books, reviews, authors, isMember } = useApp();
+  const { books, reviews, authors, isMember, currentUser } = useApp();
   usePageTitle("Kitaplar");
   const [activeEra, setActiveEra] = useState<string>("Hepsi");
   const [showForm, setShowForm] = useState(false);
@@ -104,6 +104,25 @@ export default function BooksPage() {
           >
             {showForm ? "Vazgeç" : "+ Kitap Öner"}
           </button>
+        )}
+        {/* Buton yoksa SEBEBİ dursun. Ana sayfadaki "Kitap öner →" bağlantısı
+            buraya götürüyor; öneri butonu ziyaretçiye hiç basılmadığı için
+            vaat edilen eylem aranıp bulunamıyordu. Aynı kalıp kitap detayında
+            zaten var. */}
+        {!isMember && (
+          <span className="hint">
+            {currentUser ? (
+              "Kitap önermek için üyeliğinin onaylanması gerekiyor."
+            ) : (
+              <>
+                Kitap önermek için{" "}
+                <Link to="/giris" state={{ from: "/kitaplar" }}>
+                  giriş yap
+                </Link>
+                .
+              </>
+            )}
+          </span>
         )}
       </div>
 

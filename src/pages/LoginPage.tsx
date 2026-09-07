@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { usePageTitle } from "../hooks/usePageTitle";
 
@@ -17,12 +17,18 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   usePageTitle("Kulübe Giriş");
 
-  // Zaten giriş yapılmışsa doğrudan profile (render sırasında yönlendirme
-  // yapmak yerine Navigate bileşeniyle — React uyarısı vermez).
+  // Giriş bağlantısını veren sayfa kendi yolunu `state.from` ile geçiriyor;
+  // giriş bitince kullanıcı ne yapmak istiyorsa oraya döner. Eskiden herkes
+  // profile düşüyor, oy vermeye gelen kişi niyetini kendisi hatırlıyordu.
+  const donusYolu = (location.state as { from?: string } | null)?.from ?? "/profil";
+
+  // Zaten giriş yapılmışsa (render sırasında yönlendirme yapmak yerine
+  // Navigate bileşeniyle — React uyarısı vermez).
   if (currentUser) {
-    return <Navigate to="/profil" replace />;
+    return <Navigate to={donusYolu} replace />;
   }
 
   async function handleGoogle() {
@@ -30,7 +36,7 @@ export default function LoginPage() {
     setBusy(true);
     try {
       await login();
-      navigate("/profil");
+      navigate(donusYolu, { replace: true });
     } catch (e) {
       // Kullanıcı popup'ı kapattıysa sessizce geç; diğer hataları göster.
       const code = (e as { code?: string })?.code ?? "";
@@ -49,6 +55,13 @@ export default function LoginPage() {
       <p className="hint">
         Google hesabınla giriş yap; kitap önerilerin ve profilin sana özel
         olarak saklanır.
+      </p>
+      {/* Onay koşulu girişten SONRA öğrenilmesin: Google hesabını verdikten
+          sonra "hiçbir şey yapamıyorum" sürprizi sitenin en büyük beklenti
+          uyuşmazlığıydı. Aynı metin girişten sonra banner'da da duruyor. */}
+      <p className="hint">
+        Oy vermek, kitap önermek ve yorum yazmak için kulüp yöneticisinin
+        onayı gerekiyor. Onaya kadar sitedeki her şeyi okuyabilirsin.
       </p>
 
       {isInAppBrowser() && (

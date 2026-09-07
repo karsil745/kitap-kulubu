@@ -1,4 +1,4 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { useUnreadChat } from "../hooks/useUnreadChat";
 import Avatar from "./Avatar";
@@ -18,6 +18,7 @@ const LINKS = [
 export default function Navbar() {
   const { currentUser, isMember, logout } = useApp();
   const unreadChat = useUnreadChat();
+  const { pathname } = useLocation();
 
   // Sohbet yalnızca onaylı üyeye görünür — kurallarda okuma da isMember()
   // şartına bağlı, onaysız kişiye bağlantı göstermek boşuna hayal kırıklığı.
@@ -86,7 +87,13 @@ export default function Navbar() {
             </button>
           </>
         ) : (
-          <Link to="/giris" className="btn-primary">
+          // Bulunduğun sayfa `state.from` ile taşınır: giriş bitince
+          // okuduğun yere dönersin, profile fırlamazsın.
+          <Link
+            to="/giris"
+            state={{ from: pathname }}
+            className="btn-primary"
+          >
             Giriş Yap
           </Link>
         )}

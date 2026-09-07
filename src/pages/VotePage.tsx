@@ -71,9 +71,23 @@ export default function VotePage() {
         </p>
       )}
 
+      {/* Sönük "Oy Ver" butonlarının sebebi burada duruyor. Onay bekleyen üye
+          için de yazılıyor: eskiden sebep yalnızca sayfanın en üstündeki genel
+          banner'daydı, aday listesinde biraz kaydırınca ekrandan çıkıyor ve
+          geriye sadece çalışmayan buton kalıyordu. */}
       {!currentUser && (
         <div className="cta-banner">
-          Oy vermek için <Link to="/giris">giriş yap</Link>.
+          Oy vermek için{" "}
+          <Link to="/giris" state={{ from: "/oylama" }}>
+            giriş yap
+          </Link>
+          .
+        </div>
+      )}
+      {currentUser && !isMember && (
+        <div className="cta-banner">
+          Oy verebilmek için üyeliğinin kulüp yöneticisi tarafından onaylanması
+          gerekiyor.
         </div>
       )}
 
@@ -125,7 +139,11 @@ export default function VotePage() {
           <VoteTally tally={tally} books={books} leaderId={leaderId} totalVotes={votes.length} />
         ) : (
           <p className="empty">
-            Sonuçları görmek için <Link to="/giris">giriş yap</Link>.
+            Sonuçları görmek için{" "}
+            <Link to="/giris" state={{ from: "/oylama" }}>
+              giriş yap
+            </Link>
+            .
           </p>
         )}
       </section>

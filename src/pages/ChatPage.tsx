@@ -197,7 +197,10 @@ export default function ChatPage() {
         </p>
         {!currentUser && (
           <p className="hint">
-            <Link to="/giris">Giriş yap</Link> ve onay bekle.
+            <Link to="/giris" state={{ from: "/sohbet" }}>
+              Giriş yap
+            </Link>{" "}
+            ve onay bekle.
           </p>
         )}
       </div>

@@ -1,5 +1,6 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
 import { useApp } from "./context/AppContext";
+import { usePageTitle } from "./hooks/usePageTitle";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import BooksPage from "./pages/BooksPage";
@@ -28,6 +29,24 @@ function PendingApprovalBanner() {
   );
 }
 
+// Tanımsız adres: eskiden hiçbir rota eşleşmeyince üst menü ile alt bilgi
+// arasında bomboş bir sayfa kalıyordu. Kalıp `BookDetailPage`'in "Kitap
+// bulunamadı" bloğunun aynısı.
+function BulunamadiPage() {
+  usePageTitle("Sayfa bulunamadı");
+  return (
+    <div className="section">
+      <h1>Sayfa bulunamadı</h1>
+      <p className="empty">
+        Aradığın adres burada yok — bağlantı eski ya da yanlış yazılmış olabilir.
+      </p>
+      <Link to="/" className="link-more">
+        ← Ana sayfaya dön
+      </Link>
+    </div>
+  );
+}
+
 // Uygulamanın ana çatısı: üst menü + hangi adreste hangi sayfanın gösterileceği.
 export default function App() {
   // Rota değişince içerik sertçe yerine geçmesin diye kısa bir beliriş.
@@ -51,6 +70,7 @@ export default function App() {
           <Route path="/oylama" element={<VotePage />} />
           <Route path="/takvim" element={<CalendarPage />} />
           <Route path="/sohbet" element={<ChatPage />} />
+          <Route path="*" element={<BulunamadiPage />} />
         </Routes>
         </div>
       </main>
