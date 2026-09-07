@@ -85,14 +85,21 @@ export default function BookDetailPage() {
         <div className="detail-meta">
           <span className="era-tag">{book.era}</span>
           <h1>{book.title}</h1>
+          {/* Yazar adı kimlik (serif italik), yıl ve sayfa künye. Tek italik
+              akışta yazılınca sayılar adın parçası gibi okunuyordu. */}
           <p className="detail-author">
             {author ? (
               <Link to={`/yazar/${author.id}`}>{author.name}</Link>
             ) : (
               "Bilinmeyen yazar"
             )}
-            {book.year ? ` · ${book.year}` : ""}
-            {book.pages ? ` · ${book.pages} sayfa` : ""}
+            {(book.year || book.pages) && (
+              <span className="detail-kunye">
+                {[book.year, book.pages && `${book.pages} sayfa`]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+            )}
           </p>
           {gercekAciklama(book.description) && (
             <p className="detail-desc">{gercekAciklama(book.description)}</p>

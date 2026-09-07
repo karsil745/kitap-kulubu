@@ -753,8 +753,10 @@ textarea {
   overflow: hidden;
   flex-shrink: 0;
 }
+/* Sabit 220px geniş ekranda 1116px'lik kartın içinde başlığın ağırlığını
+   taşımıyor, dar ekranda da küçülmüyordu. */
 .detail-cover img {
-  width: 220px;
+  width: clamp(190px, 17vw, 265px);
   height: auto;
   display: block;
 }
@@ -762,6 +764,13 @@ textarea {
   font-size: 6rem;
   padding: 1rem 1.4rem;
   display: block;
+}
+/* Künye sütunu kartın kalan genişliğini talep eder. `flex` verilmediğinde
+   genişliği `.detail-desc`'in 62ch'i belirliyor ve kartın sağında 243px ölü
+   alan kalıyordu. */
+.detail-meta {
+  flex: 1;
+  min-width: 0;
 }
 .detail-meta h1 {
   margin: 0.3rem 0;
@@ -771,15 +780,25 @@ textarea {
   font-family: var(--font-display);
   font-style: italic;
   font-size: 1.2rem;
+  margin: 0.4rem 0 0;
+}
+/* Yıl · sayfa: ad değil künye — serif italik akıştan çıkar, soluklaşır */
+.detail-kunye {
+  display: block;
+  margin-top: 0.35rem;
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-size: var(--fs-meta);
+  color: var(--muted);
 }
 .detail-desc {
-  margin: 1.2rem 0 1.4rem;
+  margin: 1.3rem 0 0;
   max-width: 62ch;
   line-height: 1.75;
   color: var(--ink-3);
 }
 .recommenders {
-  margin-top: 0.9rem;
+  margin-top: 1rem;
   color: var(--muted);
   font-size: var(--fs-meta);
 }
@@ -788,6 +807,7 @@ textarea {
   align-items: center;
   gap: 0.7rem;
   flex-wrap: wrap;
+  margin-top: 1.2rem;
 }
 .recommend-hint {
   font-size: var(--fs-caption);
@@ -796,6 +816,21 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
+}
+/* Künye ve yazar bölümündeki adlar: gövde metninin içinde geçen bağlantılar,
+   vurgu rengine boyanmıyor — üstüne gelince altı çizilir. Sayfadaki tek
+   bağlantı davranışı bu olsun. */
+.detail-author a,
+.author-box h3 a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.detail-author a:hover,
+.author-box h3 a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
 }
 /* Yazar / değerlendirme / alıntı bölümleri: çerçeveli panel değil, kural
    çizgisiyle başlayan editoryal bölümler. Üçü de aynı ritmi paylaşır. */
@@ -851,11 +886,16 @@ textarea {
   cursor: pointer;
   font-size: 1.4rem;
 }
+/* Künye kartındaki ayraç: üstünde anlatı (ad, yazar, açıklama), altında
+   eylemler (puan, öneri, raf, önerenler). Aradaki 22px'lik boşluk iki bölgeyi
+   ayırmaya yetmiyordu. */
 .detail-rating {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin: 0.6rem 0;
+  margin: 1.8rem 0 0;
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--rule);
 }
 .detail-rating-count {
   color: var(--muted);
@@ -1026,7 +1066,7 @@ textarea {
 
 /* ---- Raf seçici (ShelfPicker) ---- */
 .shelf-picker {
-  margin: 1rem 0;
+  margin: 1.4rem 0 0;
 }
 .shelf-picker-title {
   font-size: var(--fs-caption);
@@ -2542,24 +2582,41 @@ textarea {
   background: var(--surface-2);
 }
 
-/* Kitap detayı: künye ve alt bölümler kart */
-.detail-head {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  padding: clamp(1.3rem, 3vw, 2.2rem);
-  gap: clamp(1.5rem, 4vw, 3rem);
-  margin: 1.2rem 0 2.5rem;
-}
+/* Kitap detayı: künye ve alt bölümler kart.
+   İç boşluk tek jetonda: künye kartı 35px, alt kartlar 22/24px olduğu için
+   içerikleri farklı sol kenarlardan (189 / 178) başlıyordu.
+   `.reading-progress` ve `.discussion` bu listede yoktu; üye görünümünde
+   kartların arasında iki çıplak bölüm olarak duruyorlardı. */
+.detail-head,
 .author-box,
 .reviews-box,
-.quotes-box {
+.quotes-box,
+.detail .reading-progress,
+.detail .discussion {
   background: var(--surface);
   border-top: none;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  padding: 1.4rem 1.5rem;
-  margin-top: 2.5rem;
+  padding: 1.5rem var(--kart-ic-yatay);
+  margin-top: 1.9rem;
+}
+.detail-head {
+  gap: clamp(1.5rem, 4vw, 3rem);
+  margin: 1.2rem 0 0;
+}
+/* Detay sayfasındaki bölüm başlıkları: sayfada h1'in ardından üç ile beş kez
+   tekrar ediyorlar, `--fs-h2` (34px) o tekrar için fazla iri ve 46px'lik
+   başlıkla yarışıyordu. Kapsam `.detail`: `.author-box` yazar sayfasında da
+   kullanılıyor, oraya yansımasın. */
+.detail .author-box h2,
+.detail .reviews-box h2,
+.detail .quotes-box h2,
+.detail .reading-progress h2,
+.detail .discussion h2 {
+  font-size: 1.5rem;
+  /* `.reading-progress` ve `.discussion` başlıkları hiçbir margin kuralına
+     girmiyordu; tarayıcının kendi üst boşluğu kart dolgusuna ekleniyordu. */
+  margin: 0 0 1.1rem;
 }
 /* Yorum ve alıntılar kartın içinde satır olarak kalıyor */
 .review-list,
@@ -2642,10 +2699,14 @@ textarea {
 }
 
 @media (max-width: 640px) {
+  /* `.detail .reading-progress` kuralı iki sınıflı olduğu için bu satırın
+     de aynı özgüllükte olması gerekiyor, yoksa mobilde dolgu düşmüyor. */
   .author-box,
   .reviews-box,
   .quotes-box,
-  .detail-head {
+  .detail-head,
+  .detail .reading-progress,
+  .detail .discussion {
     padding: 1.1rem;
   }
   .vote-candidates,
