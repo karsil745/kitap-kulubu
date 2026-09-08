@@ -91,6 +91,7 @@ function QuestionRow({
   const { users, currentUser, isMember, isAdmin } = useApp();
   const [text, setText] = useState(mine?.text ?? "");
   const [saving, setSaving] = useState(false);
+  const [hata, setHata] = useState("");
   // Cevap Firestore'dan sonradan gelir; useState'in başlangıç değeri bir daha
   // çalışmadığı için kutu boş kalırdı (yorum formunda yaşadığımız hata).
   const [loadedId, setLoadedId] = useState<string | null>(mine?.id ?? null);
@@ -158,8 +159,14 @@ function QuestionRow({
               disabled={saving || !text.trim() || !degisti}
               onClick={async () => {
                 setSaving(true);
+                setHata("");
                 try {
                   await onSave(text);
+                } catch (err) {
+                  // Hata yakalanmadığında buton hiçbir şey yapmamış gibi
+                  // görünüyor, kullanıcı cevabının kaydedildiğini sanıyordu.
+                  console.error("Cevap kaydedilemedi:", err);
+                  setHata("Cevap kaydedilemedi, tekrar dene.");
                 } finally {
                   setSaving(false);
                 }
@@ -177,6 +184,7 @@ function QuestionRow({
               </button>
             )}
           </div>
+          {hata && <p className="hint error">{hata}</p>}
         </div>
       )}
 

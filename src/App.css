@@ -2700,6 +2700,12 @@ textarea {
   border-radius: var(--radius-lg);
   padding: 0.9rem 1.2rem;
 }
+/* Takvimin sonundaki bakım kutusu: sayfanın içeriğinden sonra gelir ve
+   `.admin-zone` gibi sessiz durur — dikkat çekmesi gereken bir şey değil. */
+.admin-box-alt {
+  margin-top: 3.5rem;
+  opacity: 0.75;
+}
 
 /* Profil: künye, yorum listesi ve üyelik onayları */
 .profile-head {

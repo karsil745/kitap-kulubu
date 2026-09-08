@@ -45,7 +45,8 @@ export default function ReviewForm({
   function describe(e: unknown): string {
     const code = (e as { code?: string })?.code ?? "";
     if (code === "permission-denied") {
-      return "Yetkin yok gibi görünüyor — kulüp üyeliğin onaylı mı? (users belgende approved: true)";
+      // Kullanıcıya veritabanı alanı adı gösterilmez; ne yapacağını bilemez.
+      return "Yorum yazma yetkin yok — kulüp üyeliğin henüz onaylanmamış olabilir.";
     }
     return "İşlem tamamlanamadı, tekrar dene.";
   }

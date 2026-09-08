@@ -21,15 +21,23 @@ export default function QuoteList({
   const [text, setText] = useState("");
   const [page, setPage] = useState("");
   const [saving, setSaving] = useState(false);
+  // Hata yakalanmadığında kullanıcı hiçbir şey görmüyor, üstelik metin kutusu
+  // temizlendiği için yazdığı alıntı kayboluyordu. Alanlar ancak yazma
+  // GERÇEKTEN başarılı olunca temizlenir.
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!text.trim()) return; // Boş metinle eklenmesin
     setSaving(true);
+    setError("");
     try {
       await onAdd(text.trim(), page.trim());
       setText("");
       setPage("");
+    } catch (err) {
+      console.error("Alıntı eklenemedi:", err);
+      setError("Alıntı eklenemedi, tekrar dene. Yazdığın metin duruyor.");
     } finally {
       setSaving(false);
     }
@@ -60,6 +68,7 @@ export default function QuoteList({
               Alıntı Ekle
             </button>
           </div>
+          {error && <p className="hint error">{error}</p>}
         </form>
       ) : (
         <p className="hint">

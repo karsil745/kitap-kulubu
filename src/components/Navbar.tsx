@@ -16,9 +16,20 @@ const LINKS = [
 // Mobilde bağlantılar üstten alınıp alt sekme çubuğuna taşınır — üst menü
 // dar ekranda üç satıra sarıp ekranın beşte birini yiyordu.
 export default function Navbar() {
-  const { currentUser, isMember, logout } = useApp();
+  const { currentUser, isMember, isAdmin, users, logout } = useApp();
   const unreadChat = useUnreadChat();
   const { pathname } = useLocation();
+
+  // Onay bekleyen üye sayısı. Liste `/profil` sayfasının içinde, okuma
+  // hedefinin altında duruyordu: yeni üye "onay bekliyor" yazısını görüp
+  // bekliyor, yöneticinin haberi ancak tesadüfen kendi profilini açarsa
+  // oluyordu. Yeni veri yok — `users` zaten uygulama başında dinleniyor,
+  // sayı `MemberApprovals`'takiyle aynı ölçütten türetiliyor.
+  const bekleyenOnay = isAdmin
+    ? users.filter(
+        (u) => u.id !== currentUser?.id && u.role !== "admin" && u.approved !== true
+      ).length
+    : 0;
 
   // Sohbet yalnızca onaylı üyeye görünür — kurallarda okuma da isMember()
   // şartına bağlı, onaysız kişiye bağlantı göstermek boşuna hayal kırıklığı.
@@ -28,15 +39,18 @@ export default function Navbar() {
     ...(currentUser ? [{ to: "/profil", label: "Profil" }] : []),
   ];
 
-  // Sohbet linkinin yanına okunmamış sayısını ekler. Kutu/baloncuk yok —
-  // sadece vurgu renginde bir sayı (bu projenin rozet dilinin aynısı, bkz.
-  // BadgeList: "hap değil, versal etiket").
+  // Bağlantının yanına bekleyen iş sayısını ekler: sohbette okunmamış mesaj,
+  // profilde onay bekleyen üye. Kutu/baloncuk yok — sadece vurgu renginde bir
+  // sayı (bu projenin rozet dilinin aynısı, bkz. BadgeList: "hap değil,
+  // versal etiket").
   function linkIcerik(l: (typeof links)[number]) {
-    if (l.to !== "/sohbet" || unreadChat === 0) return l.label;
+    const sayi =
+      l.to === "/sohbet" ? unreadChat : l.to === "/profil" ? bekleyenOnay : 0;
+    if (sayi === 0) return l.label;
     return (
       <>
         {l.label}
-        <span className="chat-unread">{unreadChat}</span>
+        <span className="chat-unread">{sayi}</span>
       </>
     );
   }

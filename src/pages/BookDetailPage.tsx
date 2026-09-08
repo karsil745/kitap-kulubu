@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { usePageTitle } from "../hooks/usePageTitle";
@@ -30,6 +31,9 @@ export default function BookDetailPage() {
     updateBook,
   } = useApp();
   const navigate = useNavigate();
+  // Yöneticinin sayfa sayısı düzeltmesi kaydedildi mi (koşulsuz çağrılmalı,
+  // kitap bulunamadığında erken dönüş var).
+  const [sayfaKaydedildi, setSayfaKaydedildi] = useState(false);
   // Kitap bulunamasa bile hook'lar koşulsuz çağrılmalı — id yoksa boş dizeyle çalışır.
   const { reviews, myReview, average, count, submit, remove, removeById } =
     useReviews(id ?? "");
@@ -206,9 +210,15 @@ export default function BookDetailPage() {
             key={book.pages ?? "bos"}
             onBlur={(e) => {
               const n = Math.round(Number(e.target.value));
-              if (n > 0 && n !== book.pages) updateBook(book.id, { pages: n });
+              if (n > 0 && n !== book.pages) {
+                updateBook(book.id, { pages: n });
+                setSayfaKaydedildi(true);
+              }
             }}
           />
+          {/* Alan odaktan çıkınca sessizce kaydediyordu; kaydedildiğine dair
+              hiçbir işaret yoktu. Takvimdeki "Güncellendi ✓" ile aynı kalıp. */}
+          {sayfaKaydedildi && <span className="hint">Kaydedildi ✓</span>}
           <span className="hint">
             Yanlış ya da mükerrer bir kayıtsa buradan silebilirsin.
           </span>

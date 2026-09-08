@@ -22,7 +22,16 @@ export default function MemberApprovals() {
   const pending = others.filter((u) => u.approved !== true);
   const approved = others.filter((u) => u.approved === true);
 
-  async function toggle(userId: string, next: boolean) {
+  async function toggle(userId: string, next: boolean, isim?: string) {
+    // Onayı geri almak birinin yazma yetkisini anında elinden alıyor; tek
+    // tıkla olmasın. Kitap silmede de aynı kalıp var, yıkıcı işlemler
+    // birbirini tutsun.
+    if (!next) {
+      const ok = window.confirm(
+        `${isim ?? "Bu üye"} artık oy veremeyecek, kitap öneremeyecek, yorum ve alıntı ekleyemeyecek. Onay kaldırılsın mı?`
+      );
+      if (!ok) return;
+    }
     setBusy(userId);
     setError(null);
     try {
@@ -80,7 +89,7 @@ export default function MemberApprovals() {
                 <button
                   className="btn-danger"
                   disabled={busy === u.id}
-                  onClick={() => toggle(u.id, false)}
+                  onClick={() => toggle(u.id, false, u.name)}
                 >
                   {busy === u.id ? "…" : "Onayı kaldır"}
                 </button>

@@ -55,6 +55,12 @@ export default function ShelfPicker({ bookId }: { bookId: string }) {
           </button>
         ))}
       </div>
+      {/* Seçili çipe tekrar basınca kayıt siliniyor (bkz. useShelves setStatus)
+          ama arayüz bunu söylemiyordu. Hemen üstteki öneri butonu aynı şeyi
+          zaten açıkça yazıyor; iki kontrol aynı dili konuşsun. */}
+      {status && (
+        <span className="hint recommend-hint">Kaldırmak için tekrar tıkla</span>
+      )}
 
       {status === "reading" &&
         (toplamSayfa ? (

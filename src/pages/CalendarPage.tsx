@@ -53,29 +53,6 @@ export default function CalendarPage() {
     <div>
       <h1>Okuma takvimi</h1>
 
-      {isAdmin && (
-        <div className="admin-box">
-          <p>Okunan kitapları arşive ekler ve tüm açıklama/biyografileri günceller.</p>
-          <button className="btn-primary" onClick={handleSync}>
-            Kitap içeriklerini kur & güncelle
-          </button>
-          {synced && <p className="hint">Güncellendi ✓</p>}
-
-          {sayfasiz > 0 && (
-            <>
-              <p>
-                {sayfasiz} kitapta sayfa sayısı yok — okuma ilerlemesi onlarda
-                sayfa yerine yüzdeyle giriliyor.
-              </p>
-              <button className="btn-ghost" onClick={handlePages}>
-                Sayfa sayılarını getir
-              </button>
-            </>
-          )}
-          {sayfaDurum && <p className="hint">{sayfaDurum}</p>}
-        </div>
-      )}
-
       <section className="section">
         <h2>Bu ay okuyoruz</h2>
         {currentBook ? (
@@ -134,6 +111,33 @@ export default function CalendarPage() {
           </div>
         )}
       </section>
+
+      {/* Yönetici bakım araçları sayfanın EN ALTINDA. Eskiden "Bu ay
+          okuyoruz"un da üstündeydi: yönetici her takvim ziyaretinde önce
+          kurulum makinesini görüyor, kulübün içeriğini sonra. Kitap
+          detayındaki `.admin-zone` ile aynı sessiz yerleşim. */}
+      {isAdmin && (
+        <div className="admin-box admin-box-alt">
+          <p>Okunan kitapları arşive ekler ve tüm açıklama/biyografileri günceller.</p>
+          <button className="btn-primary" onClick={handleSync}>
+            Kitap içeriklerini kur & güncelle
+          </button>
+          {synced && <p className="hint">Güncellendi ✓</p>}
+
+          {sayfasiz > 0 && (
+            <>
+              <p>
+                {sayfasiz} kitapta sayfa sayısı yok — okuma ilerlemesi onlarda
+                sayfa yerine yüzdeyle giriliyor.
+              </p>
+              <button className="btn-ghost" onClick={handlePages}>
+                Sayfa sayılarını getir
+              </button>
+            </>
+          )}
+          {sayfaDurum && <p className="hint">{sayfaDurum}</p>}
+        </div>
+      )}
     </div>
   );
 }

@@ -227,6 +227,9 @@ function AddBookForm({ onDone }: { onDone: () => void }) {
   const [descLoading, setDescLoading] = useState(false);
   // Aynı kitap zaten kayıtlıysa uyarı (kullanıcı yine de ekleyebilir)
   const [duplicate, setDuplicate] = useState<Book | null>(null);
+  // Kaydetme durumu ve hatası — sessiz başarısızlık olmasın
+  const [kaydediliyor, setKaydediliyor] = useState(false);
+  const [hata, setHata] = useState("");
 
   // Open Library arama akışı
   const [searching, setSearching] = useState(false);
@@ -312,6 +315,7 @@ function AddBookForm({ onDone }: { onDone: () => void }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim()) return;
+    setHata("");
 
     // Aynı kitap zaten var mı? İlk denemede uyar, ikinci denemede (uyarı
     // ekrandayken tekrar gönderilirse) kullanıcının kararına uy.
@@ -324,23 +328,40 @@ function AddBookForm({ onDone }: { onDone: () => void }) {
       }
     }
 
-    // Yazar zaten var mı bak (ada göre); yoksa yeni yazar belgesi oluştur
-    const authorId = await ensureAuthor(authorName.trim(), era);
-    addBook({
-      title: title.trim(),
-      authorId,
-      era,
-      year,
-      // Sayfa sayısı okuma ilerlemesini "%35" yerine "120. sayfa" yapıyor;
-      // geçersiz/boş girilirse hiç yazmıyoruz.
-      pages: Number(pages) > 0 ? Math.round(Number(pages)) : undefined,
-      cover: "📖",
-      coverImage,
-      // Boşsa yer tutucu YAZMA — boş bırak. Yer tutucu metin editoryal
-      // düzende gerçek bir açıklama gibi görünüp hero'yu bozuyordu.
-      description: description.trim(),
-    });
-    onDone();
+    // Yazma BEKLENİR ve hatası yakalanır. Eskiden `addBook` await edilmeden
+    // çağrılıp hemen `onDone()` ile form kapanıyordu: kural/ağ hatasında
+    // kullanıcı formun kapandığını görüp kitabın eklendiğini sanıyor, girdiği
+    // her şey (başlık, yazar, açıklama, seçtiği kapak) sessizce kayboluyordu.
+    setKaydediliyor(true);
+    try {
+      // Yazar zaten var mı bak (ada göre); yoksa yeni yazar belgesi oluştur
+      const authorId = await ensureAuthor(authorName.trim(), era);
+      await addBook({
+        title: title.trim(),
+        authorId,
+        era,
+        year,
+        // Sayfa sayısı okuma ilerlemesini "%35" yerine "120. sayfa" yapıyor;
+        // geçersiz/boş girilirse hiç yazmıyoruz.
+        pages: Number(pages) > 0 ? Math.round(Number(pages)) : undefined,
+        cover: "📖",
+        coverImage,
+        // Boşsa yer tutucu YAZMA — boş bırak. Yer tutucu metin editoryal
+        // düzende gerçek bir açıklama gibi görünüp hero'yu bozuyordu.
+        description: description.trim(),
+      });
+      onDone();
+    } catch (err) {
+      console.error("Kitap eklenemedi:", err);
+      const code = (err as { code?: string })?.code ?? "";
+      setHata(
+        code === "permission-denied"
+          ? "Kitap eklenemedi — kulüp üyeliğin onaylı görünmüyor."
+          : "Kitap eklenemedi, tekrar dene. Yazdıkların formda duruyor."
+      );
+    } finally {
+      setKaydediliyor(false);
+    }
   }
 
   return (
@@ -452,8 +473,10 @@ function AddBookForm({ onDone }: { onDone: () => void }) {
         </p>
       )}
 
-      <button className="btn-primary" type="submit">
-        Öneriyi Ekle
+      {hata && <p className="hint error">{hata}</p>}
+
+      <button className="btn-primary" type="submit" disabled={kaydediliyor}>
+        {kaydediliyor ? "Ekleniyor…" : "Öneriyi Ekle"}
       </button>
     </form>
   );
