@@ -3,6 +3,7 @@ import { collection, doc, onSnapshot, query, setDoc, where } from "firebase/fire
 import { db } from "../lib/firebase";
 import { useApp } from "../context/AppContext";
 import type { Election, Vote } from "../types";
+import type { VeriDurumu } from "../context/AppContext";
 
 // Belirli bir ay için "Ayın Kitabı" oylamasını gerçek zamanlı yönetir.
 // Oy belgesinin id'si deterministik: `${month}__${userId}` — böylece bir
@@ -11,6 +12,9 @@ export function useVoting(month: string) {
   const { currentUser, isAdmin, isMember } = useApp();
   const [votes, setVotes] = useState<Vote[]>([]);
   const [election, setElection] = useState<Election | null>(null);
+  // Seçim belgesinin gelip gelmediği: yokluğu "oylama sürüyor" demek, bu
+  // yüzden gelmeden önce oylama açıkmış gibi görünüyordu (~690ms).
+  const [durum, setDurum] = useState<VeriDurumu>("yukleniyor");
 
   // Bu aya ait oyları dinle. Oy belgesinde kimin neye oy verdiği yazdığı için
   // kurallar okumayı giriş şartına bağlıyor — ziyaretçide dinleyiciyi hiç
@@ -37,8 +41,12 @@ export function useVoting(month: string) {
       doc(db, "elections", month),
       (snap) => {
         setElection(snap.exists() ? ({ id: snap.id, ...snap.data() } as Election) : null);
+        setDurum("hazir");
       },
-      (err) => console.error("Seçim durumu dinlenemedi:", err)
+      (err) => {
+        console.error("Seçim durumu dinlenemedi:", err);
+        setDurum("hata");
+      }
     );
     return unsub;
   }, [month]);
@@ -119,5 +127,16 @@ export function useVoting(month: string) {
     await setDoc(doc(db, "elections", month), { month, status: "open" }, { merge: true });
   }
 
-  return { votes, election, tally, myVote, leaderId, isOpen, castVote, finalize, reopen };
+  return {
+    votes,
+    election,
+    tally,
+    myVote,
+    leaderId,
+    isOpen,
+    castVote,
+    finalize,
+    reopen,
+    durum,
+  };
 }

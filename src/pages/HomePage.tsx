@@ -20,11 +20,18 @@ let heroGirisiOynadi = false;
 // (artık sohbet akışının içinde) buradan kaldırıldı; bkz.
 // PLAN-ANA-SAYFA-SADELESTIRME.md Adım 2, 4 ve 5.
 export default function HomePage() {
-  const { books, authors, currentUser } = useApp();
-  const { current } = useSchedule();
+  const { books, authors, currentUser, veriDurumu } = useApp();
+  const { current, durum: takvimDurumu } = useSchedule();
   const month = currentMonth();
   const { leaderId, isOpen } = useVoting(month);
   const { gelenler } = useKatilim(month);
+
+  // Veri gelmeden hero "Bu ayın kitabı henüz belli değil" diyordu — ölçümde
+  // 909ms boyunca, üstelik o ayın kitabı belliyken. Boş liste "kayıt yok"
+  // değil "henüz bilmiyorum" demek; ikisi ayrıldı.
+  const veriBekleniyor =
+    veriDurumu === "yukleniyor" || takvimDurumu === "yukleniyor";
+  const veriHatasi = veriDurumu === "hata" || takvimDurumu === "hata";
 
   // Sınıf JS ile ekleniyor; JS çalışmazsa metin animasyonsuz ama görünür kalır.
   const [heroGirisi, setHeroGirisi] = useState(false);
@@ -67,7 +74,16 @@ export default function HomePage() {
 
         {/* Kapak bu animasyona dahil değil, olduğu yerde durur. */}
         <div className={heroGirisi ? "hero-text hero-giris" : "hero-text"}>
-          {botm ? (
+          {veriBekleniyor || veriHatasi ? (
+            <>
+              <span className="hero-eyebrow">{monthLabel(month)}</span>
+              <p className="hero-desc">
+                {veriHatasi
+                  ? "Kulübün verileri yüklenemedi. Bağlantını kontrol edip sayfayı yenile."
+                  : "Yükleniyor…"}
+              </p>
+            </>
+          ) : botm ? (
             <>
               {/* Ay tek başına, kitabın NEDEN orada olduğunu söylemiyor;
                   ikisi birlikte duruyor. */}

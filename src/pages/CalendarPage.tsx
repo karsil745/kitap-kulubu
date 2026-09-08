@@ -13,8 +13,13 @@ import { syncAllContent } from "../data/pastBooks";
 // Okuma takvimi: bu ay okunan kitap + geçmiş ayların arşivi.
 // Kayıtlar oylama kesinleştiğinde (veya yönetici elle) yazılır.
 export default function CalendarPage() {
-  const { current, archive } = useSchedule();
-  const { books, authors, isAdmin, currentUser } = useApp();
+  const { current, archive, durum: takvimDurumu } = useSchedule();
+  const { books, authors, isAdmin, currentUser, veriDurumu } = useApp();
+  // Boş takvim ile "henüz gelmedi" ayrı: yüklenirken sayfa "bu ay için kitap
+  // belirlenmedi" ve "henüz arşiv yok" diyordu.
+  const veriBekleniyor =
+    veriDurumu === "yukleniyor" || takvimDurumu === "yukleniyor";
+  const veriHatasi = veriDurumu === "hata" || takvimDurumu === "hata";
   const [synced, setSynced] = useState(false);
   const [sayfaDurum, setSayfaDurum] = useState<string | null>(null);
   usePageTitle("Okuma Takvimi");
@@ -67,6 +72,12 @@ export default function CalendarPage() {
               {current?.note && <p className="hint">{current.note}</p>}
             </div>
           </Link>
+        ) : veriBekleniyor ? (
+          <p className="empty">Yükleniyor…</p>
+        ) : veriHatasi ? (
+          <p className="hint error">
+            Takvim yüklenemedi. Bağlantını kontrol edip sayfayı yenile.
+          </p>
         ) : (
           <p className="empty">
             Bu ay için kitap henüz belirlenmedi. <Link to="/oylama">Oylamaya katıl →</Link>
@@ -85,7 +96,9 @@ export default function CalendarPage() {
       <section className="section">
         <h2>Geçmiş aylar</h2>
         {pastEntries.length === 0 ? (
-          <p className="empty">Henüz arşiv yok.</p>
+          <p className="empty">
+            {veriBekleniyor ? "Yükleniyor…" : "Henüz arşiv yok."}
+          </p>
         ) : (
           <div className="calendar-archive">
             {pastEntries.map((entry) => {

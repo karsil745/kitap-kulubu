@@ -29,11 +29,15 @@ export default function BookDetailPage() {
     isAdmin,
     deleteBook,
     updateBook,
+    veriDurumu,
   } = useApp();
   const navigate = useNavigate();
   // Yöneticinin sayfa sayısı düzeltmesi kaydedildi mi (koşulsuz çağrılmalı,
   // kitap bulunamadığında erken dönüş var).
   const [sayfaKaydedildi, setSayfaKaydedildi] = useState(false);
+  // Öneri ve silme yazmaları sessizce başarısız oluyordu: buton basılıyor,
+  // hiçbir şey değişmiyor, sebep yok.
+  const [yazmaHatasi, setYazmaHatasi] = useState("");
   // Kitap bulunamasa bile hook'lar koşulsuz çağrılmalı — id yoksa boş dizeyle çalışır.
   const { reviews, myReview, average, count, submit, remove, removeById } =
     useReviews(id ?? "");
@@ -46,6 +50,21 @@ export default function BookDetailPage() {
 
   const book = books.find((b) => b.id === id);
   usePageTitle(book?.title);
+
+  // Kitaplar henüz gelmemişken liste boş olduğu için bu sayfa 230ms boyunca
+  // "Kitap bulunamadı" diyordu: paylaşılan bir kitap bağlantısını açan kişinin
+  // gördüğü ilk şey buydu. Yükleniyor ve hata artık ayrı durumlar.
+  if (!book && veriDurumu !== "hazir") {
+    return (
+      <div className="section">
+        <p className="empty">
+          {veriDurumu === "hata"
+            ? "Kitap bilgileri yüklenemedi. Bağlantını kontrol edip sayfayı yenile."
+            : "Yükleniyor…"}
+        </p>
+      </div>
+    );
+  }
 
   if (!book) {
     return (
@@ -123,7 +142,15 @@ export default function BookDetailPage() {
             <div className="recommend-box">
               <button
                 className={iRecommend ? "btn-primary active" : "btn-primary"}
-                onClick={() => toggleRecommend(book.id)}
+                onClick={async () => {
+                  setYazmaHatasi("");
+                  try {
+                    await toggleRecommend(book.id);
+                  } catch (err) {
+                    console.error("Öneri kaydedilemedi:", err);
+                    setYazmaHatasi("Öneri kaydedilemedi, tekrar dene.");
+                  }
+                }}
                 title={
                   iRecommend
                     ? "Öneriyi geri almak için tıkla"
@@ -139,6 +166,8 @@ export default function BookDetailPage() {
               )}
             </div>
           ) : null}
+
+          {yazmaHatasi && <p className="hint error">{yazmaHatasi}</p>}
 
           <ShelfPicker bookId={book.id} />
 
@@ -229,8 +258,16 @@ export default function BookDetailPage() {
                 `"${book.title}" kütüphaneden silinsin mi? Bu işlem geri alınamaz.`
               );
               if (!ok) return;
-              await deleteBook(book.id);
-              navigate("/kitaplar", { replace: true });
+              setYazmaHatasi("");
+              try {
+                await deleteBook(book.id);
+                navigate("/kitaplar", { replace: true });
+              } catch (err) {
+                // Silme başarısız olunca yönlendirme de çalışmıyordu:
+                // yönetici onaylıyor, hiçbir şey olmuyordu.
+                console.error("Kitap silinemedi:", err);
+                setYazmaHatasi("Kitap silinemedi, tekrar dene.");
+              }
             }}
           >
             Kitabı sil

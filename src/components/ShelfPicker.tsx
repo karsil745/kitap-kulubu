@@ -25,6 +25,9 @@ export default function ShelfPicker({ bookId }: { bookId: string }) {
   // böylece sayfa sayısı sonradan düzeltilse de ilerleme anlamlı kalır.
   const toplamSayfa = books.find((b) => b.id === bookId)?.pages;
   const [sayfa, setSayfa] = useState("");
+  // Raf ve ilerleme yazmaları sessizce başarısız oluyordu: çip basılıyor,
+  // seçim geri dönüyor, sebep görünmüyordu.
+  const [hata, setHata] = useState("");
   useEffect(() => {
     if (!toplamSayfa) return;
     setSayfa(progress ? String(Math.round((progress / 100) * toplamSayfa)) : "");
@@ -35,7 +38,13 @@ export default function ShelfPicker({ bookId }: { bookId: string }) {
     const n = Number(sayfa);
     if (!Number.isFinite(n) || n < 0) return;
     const kirpilmis = Math.min(toplamSayfa, Math.max(0, Math.round(n)));
-    await setProgress((kirpilmis / toplamSayfa) * 100);
+    try {
+      setHata("");
+      await setProgress((kirpilmis / toplamSayfa) * 100);
+    } catch (err) {
+      console.error("İlerleme kaydedilemedi:", err);
+      setHata("İlerleme kaydedilemedi, tekrar dene.");
+    }
   }
 
   if (!isMember) return null;
@@ -49,7 +58,15 @@ export default function ShelfPicker({ bookId }: { bookId: string }) {
             key={opt.status}
             type="button"
             className={status === opt.status ? "chip active" : "chip"}
-            onClick={() => setStatus(opt.status)}
+            onClick={async () => {
+              setHata("");
+              try {
+                await setStatus(opt.status);
+              } catch (err) {
+                console.error("Raf kaydedilemedi:", err);
+                setHata("Raf durumu kaydedilemedi, tekrar dene.");
+              }
+            }}
           >
             {opt.label}
           </button>
@@ -61,6 +78,7 @@ export default function ShelfPicker({ bookId }: { bookId: string }) {
       {status && (
         <span className="hint recommend-hint">Kaldırmak için tekrar tıkla</span>
       )}
+      {hata && <p className="hint error">{hata}</p>}
 
       {status === "reading" &&
         (toplamSayfa ? (

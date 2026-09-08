@@ -26,6 +26,7 @@ export default function Meeting({
   const { setMeeting } = useSchedule();
   const { benimDurumum, gelenler, isaretle } = useKatilim(month);
   const [editing, setEditing] = useState(false);
+  const [hata, setHata] = useState("");
   const [value, setValue] = useState(
     meetingAt ? tarihGirdisine(meetingAt) : ""
   );
@@ -40,20 +41,33 @@ export default function Meeting({
   async function kaydet() {
     const ms = tarihGirdisinden(value);
     if (ms === null) return;
-    await setMeeting(month, ms);
-    setEditing(false);
+    try {
+      setHata("");
+      await setMeeting(month, ms);
+      setEditing(false);
+    } catch (err) {
+      console.error("Buluşma kaydedilemedi:", err);
+      setHata("Buluşma zamanı kaydedilemedi, tekrar dene.");
+    }
   }
 
   async function kaldir() {
-    await setMeeting(month, null);
-    setEditing(false);
-    setValue("");
+    try {
+      setHata("");
+      await setMeeting(month, null);
+      setEditing(false);
+      setValue("");
+    } catch (err) {
+      console.error("Buluşma kaldırılamadı:", err);
+      setHata("Buluşma kaldırılamadı, tekrar dene.");
+    }
   }
 
   if (!meetingAt && !isAdmin) return null;
 
   return (
     <div className="meeting">
+      {hata && <p className="hint error">{hata}</p>}
       {meetingAt ? (
         <p className="meeting-line">
           <span className="meeting-label">

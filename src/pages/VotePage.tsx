@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { useVoting } from "../hooks/useVoting";
@@ -12,10 +12,10 @@ import VoteTally from "../components/VoteTally";
 // yönetici oylamayı kesinleştirince kazanan okuma takvimine yazılır.
 export default function VotePage() {
   const month = currentMonth();
-  const { votes, tally, myVote, leaderId, isOpen, castVote, finalize, reopen, election } =
+  const { votes, tally, myVote, leaderId, isOpen, castVote, finalize, reopen, election, durum: oylamaDurumu } =
     useVoting(month);
-  const { books, authors, isAdmin, isMember, currentUser } = useApp();
-  const { archive } = useSchedule();
+  const { books, authors, isAdmin, isMember, currentUser, veriDurumu } = useApp();
+  const { archive, durum: takvimDurumu } = useSchedule();
   usePageTitle("Ayın Kitabı Oylaması");
 
   // Geçmiş aylarda okunmuş kitaplar aday olmaz — yoksa liste her ay şişer ve
@@ -33,6 +33,30 @@ export default function VotePage() {
     ? books.find((b) => b.id === election.winnerBookId)
     : null;
 
+  // Seçim belgesi gelmeden `isOpen` true kabul ediliyor ve aday listesi boş
+  // oluyor: sayfa ~690ms "oylama sürüyor, aday kalmadı" diyordu, oysa oylama
+  // kapanmıştı ve bir kazanan vardı. "Henüz bilmiyorum" ayrı bir durum.
+  const veriBekleniyor =
+    veriDurumu === "yukleniyor" ||
+    takvimDurumu === "yukleniyor" ||
+    oylamaDurumu === "yukleniyor";
+  const veriHatasi =
+    veriDurumu === "hata" || takvimDurumu === "hata" || oylamaDurumu === "hata";
+
+  // Yazma hataları eskiden hiçbir yere düşmüyordu: üye butona basıyor,
+  // buton değişmiyor, sebep yok. Tek bir satırda toplanıyor.
+  const [yazmaHatasi, setYazmaHatasi] = useState("");
+
+  async function oyVer(bookId: string) {
+    setYazmaHatasi("");
+    try {
+      await castVote(bookId);
+    } catch (err) {
+      console.error("Oy verilemedi:", err);
+      setYazmaHatasi("Oyun kaydedilemedi, tekrar dene.");
+    }
+  }
+
   async function handleFinalize() {
     if (!leaderId) return;
     const leaderBook = books.find((b) => b.id === leaderId);
@@ -40,13 +64,25 @@ export default function VotePage() {
       `"${leaderBook?.title ?? "Bu kitap"}" bu ayın kitabı olarak kesinleştirilsin mi? Bu işlem oylamayı kapatır ve takvime yazar.`
     );
     if (!ok) return;
-    await finalize();
+    setYazmaHatasi("");
+    try {
+      await finalize();
+    } catch (err) {
+      console.error("Kesinleştirilemedi:", err);
+      setYazmaHatasi("Oylama kesinleştirilemedi, tekrar dene.");
+    }
   }
 
   async function handleReopen() {
     const ok = window.confirm("Oylama yeniden açılsın mı?");
     if (!ok) return;
-    await reopen();
+    setYazmaHatasi("");
+    try {
+      await reopen();
+    } catch (err) {
+      console.error("Yeniden açılamadı:", err);
+      setYazmaHatasi("Oylama yeniden açılamadı, tekrar dene.");
+    }
   }
 
   return (
@@ -56,7 +92,14 @@ export default function VotePage() {
       </div>
       <p className="hint">{monthLabel(month)}</p>
 
-      {!isOpen && winner && (
+      {veriBekleniyor && <p className="empty">Yükleniyor…</p>}
+      {veriHatasi && (
+        <p className="hint error">
+          Oylama bilgileri yüklenemedi. Bağlantını kontrol edip sayfayı yenile.
+        </p>
+      )}
+
+      {!veriBekleniyor && !isOpen && winner && (
         <div className="cta-banner">
           Oylama kapandı — 🏆 Bu ayın kitabı:{" "}
           <Link to={`/kitap/${winner.id}`}>
@@ -65,7 +108,7 @@ export default function VotePage() {
         </div>
       )}
 
-      {!isOpen && !winner && (
+      {!veriBekleniyor && !isOpen && !winner && (
         <p className="hint" style={{ marginTop: "0.6rem" }}>
           Oylama kapandı.
         </p>
@@ -95,14 +138,16 @@ export default function VotePage() {
         <div className="section-head">
           <h2>Adaylar</h2>
           <span className="hint">
-            {candidates.length} kitap · okunanlar listede yok
+            {veriBekleniyor ? "…" : candidates.length} kitap · okunanlar listede yok
           </span>
         </div>
-        {candidates.length === 0 && (
+        {/* Yüklenirken boş liste "hepsini okuduk" diye kutlanıyordu. */}
+        {!veriBekleniyor && !veriHatasi && candidates.length === 0 && (
           <p className="empty">
             Aday kalmadı — hepsini okuduk! <Link to="/kitaplar">Yeni kitap öner →</Link>
           </p>
         )}
+        {yazmaHatasi && <p className="hint error">{yazmaHatasi}</p>}
         <div className="vote-candidates">
           {candidates.map((book) => {
             const author = authors.find((a) => a.id === book.authorId);
@@ -122,7 +167,7 @@ export default function VotePage() {
                 <button
                   className={isMine ? "btn-primary active" : "btn-primary"}
                   disabled={disabled}
-                  onClick={() => castVote(book.id)}
+                  onClick={() => oyVer(book.id)}
                 >
                   {isMine ? "✓ Oyun" : "Oy Ver"}
                 </button>

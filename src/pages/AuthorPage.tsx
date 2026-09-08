@@ -6,10 +6,23 @@ import BookCard from "../components/BookCard";
 // Tek bir yazarın detay sayfası: tanıtım bilgileri ve o yazara ait kitaplar.
 export default function AuthorPage() {
   const { id } = useParams();
-  const { authors, books } = useApp();
+  const { authors, books, veriDurumu } = useApp();
 
   const author = authors.find((a) => a.id === id);
   usePageTitle(author?.name);
+
+  // Kitap detayındaki ile aynı sebep: yazarlar gelmeden "bulunamadı" demek.
+  if (!author && veriDurumu !== "hazir") {
+    return (
+      <div className="section">
+        <p className="empty">
+          {veriDurumu === "hata"
+            ? "Yazar bilgileri yüklenemedi. Bağlantını kontrol edip sayfayı yenile."
+            : "Yükleniyor…"}
+        </p>
+      </div>
+    );
+  }
 
   if (!author) {
     return (

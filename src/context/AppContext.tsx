@@ -71,7 +71,15 @@ interface AppState {
   markChatSeen: () => Promise<void>;
   // Kullanıcı yıllık okuma hedefini belirler/değiştirir (users/{uid}.readingGoal).
   setReadingGoal: (goal: number) => Promise<void>;
+  // Uygulama düzeyindeki dinleyicilerin (kitaplar, yazarlar) durumu.
+  // Koleksiyonlar `[]` diye başladığı için sayfalar "veri yok" ile "henüz
+  // gelmedi"yi ayırt edemiyor ve yükleme sırasında yanlış şey söylüyorlardı
+  // ("Kitap bulunamadı", "Bu ayın kitabı henüz belli değil"). Kalıcı bir
+  // hatada da aynı boşluk görünüyordu; bu yüzden `hata` ayrı bir durum.
+  veriDurumu: VeriDurumu;
 }
+
+export type VeriDurumu = "yukleniyor" | "hazir" | "hata";
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
@@ -117,6 +125,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Auth durumu Firebase'den gelene kadar bekleriz (sayfa yenilenince
   // "giriş yapılmamış" gibi anlık yanıp sönmeyi önler).
   const [authReady, setAuthReady] = useState(false);
+  // Kitap ve yazar dinleyicilerinin durumu; ikisi birleşip `veriDurumu` olur.
+  const [kitapDurumu, setKitapDurumu] = useState<VeriDurumu>("yukleniyor");
+  const [yazarDurumu, setYazarDurumu] = useState<VeriDurumu>("yukleniyor");
+  // Biri bile hata verdiyse hata; ikisi de geldiyse hazır; yoksa yükleniyor.
+  const veriDurumu: VeriDurumu =
+    kitapDurumu === "hata" || yazarDurumu === "hata"
+      ? "hata"
+      : kitapDurumu === "hazir" && yazarDurumu === "hazir"
+        ? "hazir"
+        : "yukleniyor";
 
   // Giriş yapan kullanıcı yönetici mi?
   const isAdmin = currentUser?.role === "admin";
@@ -179,8 +197,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const list = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Book));
         list.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0)); // En yeni üstte
         setBooks(list);
+        setKitapDurumu("hazir");
       },
-      (err) => console.error("Kitaplar dinlenemedi:", err)
+      (err) => {
+        console.error("Kitaplar dinlenemedi:", err);
+        setKitapDurumu("hata");
+      }
     );
     return unsub;
   }, []);
@@ -212,8 +234,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setAuthors(
           snap.docs.map((d) => ({ id: d.id, ...d.data() } as Author))
         );
+        setYazarDurumu("hazir");
       },
-      (err) => console.error("Yazarlar dinlenemedi:", err)
+      (err) => {
+        console.error("Yazarlar dinlenemedi:", err);
+        setYazarDurumu("hata");
+      }
     );
     return unsub;
   }, []);
@@ -416,6 +442,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setApproved,
         markChatSeen,
         setReadingGoal,
+        veriDurumu,
       }}
     >
       {children}

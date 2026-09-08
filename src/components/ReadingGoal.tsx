@@ -10,6 +10,7 @@ export default function ReadingGoal() {
   const { currentUser, setReadingGoal } = useApp();
   const { shelves } = useMyShelves();
   const [taslak, setTaslak] = useState("");
+  const [hata, setHata] = useState("");
 
   if (!currentUser) return null;
 
@@ -23,7 +24,14 @@ export default function ReadingGoal() {
   async function kaydet() {
     const n = Number(taslak);
     if (taslak.trim() && Number.isInteger(n) && n > 0) {
-      await setReadingGoal(n);
+      try {
+        setHata("");
+        await setReadingGoal(n);
+      } catch (err) {
+        console.error("Hedef kaydedilemedi:", err);
+        setHata("Hedef kaydedilemedi, tekrar dene.");
+        return;
+      }
     }
     setTaslak("");
   }
@@ -57,6 +65,7 @@ export default function ReadingGoal() {
           </>
         )}
 
+        {hata && <p className="hint error">{hata}</p>}
         <div className="progress-input">
           <label htmlFor="reading-goal-input">
             {hedef ? "Hedefi değiştir" : "Bu yıl kaç kitap okumak istersin?"}

@@ -48,6 +48,7 @@ export default function ChatPage() {
   const hareketler = useActivity(HAREKET_SAYISI);
   const [taslak, setTaslak] = useState("");
   const [gonderiliyor, setGonderiliyor] = useState(false);
+  const [gonderHatasi, setGonderHatasi] = useState("");
   usePageTitle("Sohbet");
 
   // Sayfa açıkken Navbar'daki okunmamış rozeti hep sıfır kalsın: her yeni
@@ -161,10 +162,16 @@ export default function ChatPage() {
     e?.preventDefault();
     if (!taslak.trim() || gonderiliyor) return;
     setGonderiliyor(true);
+    setGonderHatasi("");
     try {
       altta.current = true; // Kendi mesajını her hâlükârda gör
       await gonder(taslak);
       setTaslak("");
+    } catch (err) {
+      // Yakalanmadığında buton hiçbir şey yapmamış gibi görünüyordu. Taslak
+      // zaten temizlenmiyor, yazılan mesaj kaybolmaz.
+      console.error("Mesaj gönderilemedi:", err);
+      setGonderHatasi("Mesaj gönderilemedi, tekrar dene.");
     } finally {
       setGonderiliyor(false);
     }
@@ -295,6 +302,7 @@ export default function ChatPage() {
         })}
       </div>
 
+      {gonderHatasi && <p className="hint error">{gonderHatasi}</p>}
       <form className="chat-giris" onSubmit={handleSubmit}>
         <textarea
           rows={1}

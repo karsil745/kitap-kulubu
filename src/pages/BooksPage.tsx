@@ -18,7 +18,7 @@ const SIRALAMALAR: { value: Siralama; label: string }[] = [
 
 // Kitaplar sayfası: arama + döneme göre filtreleme + sıralama + öneri formu.
 export default function BooksPage() {
-  const { books, reviews, authors, isMember, currentUser } = useApp();
+  const { books, reviews, authors, isMember, currentUser, veriDurumu } = useApp();
   usePageTitle("Kitaplar");
   const [activeEra, setActiveEra] = useState<string>("Hepsi");
   const [showForm, setShowForm] = useState(false);
@@ -93,7 +93,7 @@ export default function BooksPage() {
           <h2>Kitaplar</h2>
           <span className="hint">
             {filtered.length === books.length
-              ? `${books.length} kitap`
+              ? (veriDurumu === "hazir" ? `${books.length} kitap` : "…")
               : `${filtered.length} / ${books.length} kitap`}
           </span>
         </div>
@@ -174,7 +174,13 @@ export default function BooksPage() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {filtered.length === 0 && veriDurumu !== "hazir" ? (
+        <p className="empty">
+          {veriDurumu === "hata"
+            ? "Kitaplar yüklenemedi. Bağlantını kontrol edip sayfayı yenile."
+            : "Yükleniyor…"}
+        </p>
+      ) : filtered.length === 0 ? (
         <p className="empty">
           {arama
             ? `“${arama}” için sonuç yok.`
@@ -236,6 +242,8 @@ function AddBookForm({ onDone }: { onDone: () => void }) {
   const [searched, setSearched] = useState(false);
   const [results, setResults] = useState<OpenLibraryResult[]>([]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  // Aramanın kendisi başarısız mı oldu (sonuç yokluğundan farklı)
+  const [aramaHatasi, setAramaHatasi] = useState(false);
 
   async function handleSearch() {
     const q = title.trim();
@@ -243,6 +251,7 @@ function AddBookForm({ onDone }: { onDone: () => void }) {
     setSearching(true);
     setSearched(false);
     setSelectedKey(null);
+    setAramaHatasi(false);
     try {
       const url = `https://openlibrary.org/search.json?title=${encodeURIComponent(
         q
@@ -251,9 +260,12 @@ function AddBookForm({ onDone }: { onDone: () => void }) {
       const data = await res.json();
       setResults(Array.isArray(data.docs) ? data.docs : []);
     } catch (err) {
-      // Ağ hatasında sessiz düş — elle giriş çalışmaya devam etsin
+      // Ağ hatası ile "sonuç yok" ayrı şeyler: eskiden ikisi de "Sonuç
+      // bulunamadı" diye görünüyor, internet yokken kullanıcı kitabın
+      // gerçekten bulunmadığını sanıyordu. Elle giriş yine çalışıyor.
       console.error("Open Library araması başarısız:", err);
       setResults([]);
+      setAramaHatasi(true);
     } finally {
       setSearching(false);
       setSearched(true);
@@ -389,7 +401,11 @@ function AddBookForm({ onDone }: { onDone: () => void }) {
       </div>
 
       {searched && !searching && results.length === 0 && (
-        <p className="hint">Sonuç bulunamadı, bilgileri elle girebilirsin.</p>
+        <p className={aramaHatasi ? "hint error" : "hint"}>
+          {aramaHatasi
+            ? "Aramaya ulaşılamadı — bağlantını kontrol et. Bilgileri elle de girebilirsin."
+            : "Sonuç bulunamadı, bilgileri elle girebilirsin."}
+        </p>
       )}
 
       {results.length > 0 && (

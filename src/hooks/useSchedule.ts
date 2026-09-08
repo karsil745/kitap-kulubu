@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { collection, doc, onSnapshot, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useApp } from "../context/AppContext";
+import type { VeriDurumu } from "../context/AppContext";
 import type { ScheduleEntry } from "../types";
 import { currentMonth } from "../lib/month";
 
@@ -10,6 +11,9 @@ import { currentMonth } from "../lib/month";
 export function useSchedule() {
   const { isAdmin } = useApp();
   const [entries, setEntries] = useState<ScheduleEntry[]>([]);
+  // Kayıt yokluğu ile "henüz gelmedi" ayrı şeyler: ana sayfa boş listeyi
+  // "bu ayın kitabı belli değil" diye okuyup ~900ms yanlış şey yazıyordu.
+  const [durum, setDurum] = useState<VeriDurumu>("yukleniyor");
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -18,8 +22,12 @@ export function useSchedule() {
         setEntries(
           snap.docs.map((d) => ({ id: d.id, ...d.data() } as ScheduleEntry))
         );
+        setDurum("hazir");
       },
-      (err) => console.error("Takvim dinlenemedi:", err)
+      (err) => {
+        console.error("Takvim dinlenemedi:", err);
+        setDurum("hata");
+      }
     );
     return unsub;
   }, []);
@@ -55,5 +63,5 @@ export function useSchedule() {
     );
   }
 
-  return { current, archive, byMonth, setMeeting };
+  return { current, archive, byMonth, setMeeting, durum };
 }
