@@ -17,7 +17,14 @@ export default function ReviewList({
   hideUserId?: string | null;
   onDelete?: (reviewId: string) => Promise<void>;
 }) {
-  const { users, isAdmin } = useApp();
+  const { users, currentUser, isAdmin } = useApp();
+
+  // reviews herkese açık okunuyor (firestore.rules: allow read: if true) ama
+  // yazar adını çözen `users` koleksiyonu girişe bağlı — AppContext ziyaretçide
+  // bu dinleyiciyi hiç açmıyor. Sonuç: gerçek bir isim varken ziyaretçi "Bilinmeyen
+  // üye" görüyordu, sanki hesap silinmiş gibi. Görüntüleyici giriş yapmamışsa
+  // isim gerçekten eksik değil, sadece bu kişiye kapalı — ikisi ayrı durum.
+  const isimGorunmuyor = !currentUser;
 
   const shown = hideUserId
     ? reviews.filter((r) => r.userId !== hideUserId)
@@ -44,7 +51,7 @@ export default function ReviewList({
                 <Avatar user={author ?? { id: review.userId, photo: null }} size={22} />
               </span>
               <span className="review-name">
-                {author?.name ?? "Bilinmeyen üye"}
+                {author?.name ?? (isimGorunmuyor ? "Bir üye" : "Bilinmeyen üye")}
               </span>
               <StarRating value={review.rating} readOnly />
               <span className="review-date">

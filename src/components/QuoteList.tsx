@@ -18,6 +18,12 @@ export default function QuoteList({
   onToggleLike: (id: string) => Promise<void>;
 }) {
   const { users, currentUser, isMember } = useApp();
+
+  // quotes herkese açık okunuyor ama yazar adını çözen `users` koleksiyonu
+  // girişe bağlı; ziyaretçide dinleyici hiç açılmıyor (bkz. ReviewList aynı not).
+  // Gerçek isim varken "Bilinmeyen üye" görünmesin — o kişiye kapalı olduğu
+  // için görünmüyor, silinmiş bir hesap değil.
+  const isimGorunmuyor = !currentUser;
   const [text, setText] = useState("");
   const [page, setPage] = useState("");
   const [saving, setSaving] = useState(false);
@@ -106,7 +112,7 @@ export default function QuoteList({
                 <div className="quote-card-foot">
                   <span className="quote-author">
                     <Avatar user={author ?? { id: quote.userId, photo: null }} size={20} />
-                    {author?.name ?? "Bilinmeyen üye"}
+                    {author?.name ?? (isimGorunmuyor ? "Bir üye" : "Bilinmeyen üye")}
                   </span>
                   {quote.page && <span className="quote-page">s. {quote.page}</span>}
                   <span className="quote-date">
