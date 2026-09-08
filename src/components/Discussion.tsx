@@ -56,6 +56,7 @@ export default function Discussion({ bookId }: { bookId: string }) {
         >
           <input
             placeholder="Yeni tartışma sorusu"
+            aria-label="Yeni tartışma sorusu"
             value={yeniSoru}
             maxLength={500}
             onChange={(e) => setYeniSoru(e.target.value)}
@@ -145,8 +146,12 @@ function QuestionRow({
 
       {isMember && (
         <div className="answer-form">
+          {/* Sayfada bu alandan birden fazla var (soru başına bir tane);
+              jenerik bir etiket ekran okuyucuda hepsini aynı isimle
+              listeler, o yüzden hangi soruya cevap olduğu ada dahil. */}
           <textarea
             placeholder="Sen ne düşünüyorsun?"
+            aria-label={`"${question.text}" sorusuna cevabın`}
             value={text}
             maxLength={2000}
             rows={3}

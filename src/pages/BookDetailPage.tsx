@@ -229,9 +229,14 @@ export default function BookDetailPage() {
       {isAdmin && (
         <section className="admin-zone">
           {/* Sayfa sayısı Open Library'den tahminle geliyor ve Türkçe
-              baskılarda sık sık yanlış oluyor — buradan düzeltilebilir. */}
-          <span className="hint">Sayfa sayısı</span>
+              baskılarda sık sık yanlış oluyor — buradan düzeltilebilir.
+              Görünür metin zaten vardı, ekran okuyucuya bağlı değildi
+              (ReadingGoal/ShelfPicker'daki label-htmlFor deseniyle aynı). */}
+          <label htmlFor="admin-pages-input" className="hint">
+            Sayfa sayısı
+          </label>
           <input
+            id="admin-pages-input"
             className="admin-pages"
             type="number"
             min={1}

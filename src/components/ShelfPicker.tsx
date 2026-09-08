@@ -53,11 +53,14 @@ export default function ShelfPicker({ bookId }: { bookId: string }) {
     <div className="shelf-picker">
       <p className="shelf-picker-title">Rafım</p>
       <div className="shelf-picker-options">
+        {/* Meeting.tsx'teki katılım butonlarıyla aynı desen: seçili durum
+            aria-pressed ile de bildiriliyor, yalnızca renk/çizgiyle değil. */}
         {OPTIONS.map((opt) => (
           <button
             key={opt.status}
             type="button"
             className={status === opt.status ? "chip active" : "chip"}
+            aria-pressed={status === opt.status}
             onClick={async () => {
               setHata("");
               try {

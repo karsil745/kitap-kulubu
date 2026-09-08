@@ -487,6 +487,18 @@
 .section h2 {
   margin: 0;
 }
+/* Kitaplar ve giriş sayfaları başlıklarını h2 yerine h1 yapıyor (her sayfa
+   tek h1 ile açılmalı — bu ikisi h2'den başlıyordu, başlıkla gezinen
+   kullanıcı üst seviyeyi kaybediyordu). Genel bir `.section-head h1` kuralı
+   eklenmedi: VotePage gibi sayfalarda `.section-head` içinde GERÇEKTEN
+   --fs-h1 boyutunda olması gereken başlıklar var, onları küçültmesin diye
+   görünümü eski h2 ile birebir aynı tutan bu sınıf kullanılıyor. */
+.page-baslik-kompakt {
+  font-size: var(--fs-h2);
+  line-height: 1.1;
+  letter-spacing: -0.022em;
+  margin: 0;
+}
 .link-more {
   flex-shrink: 0;
   font-size: var(--fs-label);

@@ -90,7 +90,10 @@ export default function BooksPage() {
             olarak dururken ziyaretçide en sağa fırlıyor, üye görünümünde ise
             başlıkla buton arasında ortada asılı kalıyordu. */}
         <div className="books-basligi">
-          <h2>Kitaplar</h2>
+          {/* Sayfa başlığı: sitedeki diğer tüm sayfalar h1 ile açılıyor, bu
+              tek h2'den başlıyordu — görünüm .page-baslik-kompakt ile aynı
+              kalıyor, yalnızca etiket düzeliyor. */}
+          <h1 className="page-baslik-kompakt">Kitaplar</h1>
           <span className="hint">
             {filtered.length === books.length
               ? (veriDurumu === "hazir" ? `${books.length} kitap` : "…")
@@ -137,6 +140,7 @@ export default function BooksPage() {
             className="book-search"
             type="search"
             placeholder="Kitap ya da yazar ara"
+            aria-label="Kitap ya da yazar ara"
             value={arama}
             onChange={(e) => setArama(e.target.value)}
           />
@@ -154,11 +158,14 @@ export default function BooksPage() {
           </select>
         </div>
 
-        {/* Dönem filtreleri */}
+        {/* Dönem filtreleri. Seçili olan yalnızca renk + alt çizgiyle
+            ayrışıyordu; aria-pressed Meeting.tsx'teki katılım butonlarıyla
+            aynı desen. */}
         <div className="filters">
           <button
             className={activeEra === "Hepsi" ? "chip active" : "chip"}
             onClick={() => setActiveEra("Hepsi")}
+            aria-pressed={activeEra === "Hepsi"}
           >
             Hepsi
           </button>
@@ -167,6 +174,7 @@ export default function BooksPage() {
               key={era}
               className={activeEra === era ? "chip active" : "chip"}
               onClick={() => setActiveEra(era)}
+              aria-pressed={activeEra === era}
             >
               {era}
             </button>
@@ -381,6 +389,7 @@ function AddBookForm({ onDone }: { onDone: () => void }) {
       <div className="book-search-row">
         <input
           placeholder="Kitap adı"
+          aria-label="Kitap adı"
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
@@ -448,10 +457,15 @@ function AddBookForm({ onDone }: { onDone: () => void }) {
 
       <input
         placeholder="Yazar"
+        aria-label="Yazar"
         value={authorName}
         onChange={(e) => setAuthorName(e.target.value)}
       />
-      <select value={era} onChange={(e) => setEra(e.target.value)}>
+      <select
+        value={era}
+        onChange={(e) => setEra(e.target.value)}
+        aria-label="Dönem"
+      >
         {ERAS.map((er) => (
           <option key={er} value={er}>
             {er}
@@ -462,6 +476,7 @@ function AddBookForm({ onDone }: { onDone: () => void }) {
         type="number"
         min={1}
         placeholder="Sayfa sayısı (okuma ilerlemesi için)"
+        aria-label="Sayfa sayısı"
         value={pages}
         onChange={(e) => setPages(e.target.value)}
       />
@@ -470,6 +485,7 @@ function AddBookForm({ onDone }: { onDone: () => void }) {
       )}
       <textarea
         placeholder="Kısa açıklama (aramadan otomatik gelebilir)"
+        aria-label="Kısa açıklama"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />

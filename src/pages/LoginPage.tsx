@@ -51,7 +51,8 @@ export default function LoginPage() {
 
   return (
     <div className="section login">
-      <h2>Kulübe giriş</h2>
+      {/* Aynı gerekçe: sayfa h2 ile açılıyordu, tek h1'i yoktu. */}
+      <h1 className="page-baslik-kompakt">Kulübe giriş</h1>
       <p className="hint">
         Google hesabınla giriş yap; kitap önerilerin ve profilin sana özel
         olarak saklanır.

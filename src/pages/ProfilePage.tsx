@@ -85,6 +85,7 @@ export default function ProfilePage() {
         {auth.currentUser?.photoURL && (
           <button
             className={currentUser.photo ? "chip active" : "chip"}
+            aria-pressed={!!currentUser.photo}
             onClick={() =>
               updateAvatar(currentUser.photo ? null : auth.currentUser?.photoURL ?? null)
             }

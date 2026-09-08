@@ -83,12 +83,16 @@ export default function ReviewForm({
 
   return (
     <form className="review-form" onSubmit={handleSubmit}>
+      {/* Üstteki metin yıldız puanı VE aşağıdaki alanın ikisine birden ait
+          olduğu için textarea'ya <label> yerine kendi aria-label'ı verildi —
+          tek bir label'a bağlamak yanıltıcı olurdu. */}
       <span className="review-form-label">
         {myReview ? "Senin yorumun" : "Sen ne düşünüyorsun?"}
       </span>
       <StarRating value={rating} onChange={setRating} />
       <textarea
         placeholder="Bu kitap hakkında düşüncelerin (opsiyonel)"
+        aria-label="Yorumun"
         value={text}
         maxLength={2000}
         onChange={(e) => setText(e.target.value)}

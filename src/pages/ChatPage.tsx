@@ -309,6 +309,7 @@ export default function ChatPage() {
           value={taslak}
           maxLength={2000}
           placeholder="Bir şeyler yaz…"
+          aria-label="Mesaj"
           onChange={(e) => {
             setTaslak(e.target.value);
             boyutlaAyarla(e.target);

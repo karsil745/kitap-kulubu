@@ -55,6 +55,7 @@ export default function QuoteList({
         <form className="quote-form" onSubmit={handleSubmit}>
           <textarea
             placeholder="Sevdiğin bir alıntıyı paylaş"
+            aria-label="Alıntı metni"
             value={text}
             maxLength={2000}
             onChange={(e) => setText(e.target.value)}
@@ -62,6 +63,7 @@ export default function QuoteList({
           <div className="quote-form-row">
             <input
               placeholder="Sayfa (isteğe bağlı)"
+              aria-label="Sayfa numarası"
               value={page}
               maxLength={20}
               onChange={(e) => setPage(e.target.value)}

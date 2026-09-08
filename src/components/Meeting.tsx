@@ -149,6 +149,7 @@ export default function Meeting({
           <div className="meeting-edit">
             <input
               type="datetime-local"
+              aria-label="Buluşma zamanı"
               value={value}
               onChange={(e) => setValue(e.target.value)}
             />
