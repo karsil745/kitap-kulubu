@@ -15,11 +15,48 @@ import type { Review } from "../types";
 
 // Kullanıcının kendi profili: bilgileri + rafları + rozetleri + önerdiği
 // kitaplar + verdiği yorumlar.
+const BIO_SINIRI = 500; // firestore.rules: shortText(bio, 500)
+
 export default function ProfilePage() {
-  const { currentUser, books, updateAvatar } = useApp();
+  const { currentUser, books, updateAvatar, setBio } = useApp();
   const { statusOf } = useMyShelves();
   const [myReviews, setMyReviews] = useState<Review[]>([]);
   usePageTitle("Profilim");
+
+  // Biyografi düzenleme: taslak yalnızca düzenleme moduna girerken
+  // currentUser.bio'dan dolduruluyor, sonra kendi başına yaşıyor — yoksa
+  // her karakterde currentUser güncellenip taslağın üzerine yazardı.
+  const [bioDuzenleniyor, setBioDuzenleniyor] = useState(false);
+  const [bioTaslak, setBioTaslak] = useState("");
+  const [bioKaydediliyor, setBioKaydediliyor] = useState(false);
+  const [bioHata, setBioHata] = useState("");
+
+  function bioDuzenlemeyeBasla() {
+    setBioTaslak(currentUser?.bio ?? "");
+    setBioHata("");
+    setBioDuzenleniyor(true);
+  }
+
+  function bioVazgec() {
+    setBioDuzenleniyor(false);
+    setBioHata("");
+  }
+
+  async function bioKaydet() {
+    setBioKaydediliyor(true);
+    setBioHata("");
+    try {
+      await setBio(bioTaslak.trim());
+      setBioDuzenleniyor(false);
+    } catch (err) {
+      // Hata olduğunda form AÇIK kalır, yazdığı metin kaybolmaz — projenin
+      // yerleşik deseni (bkz. QuoteList, ReviewForm, ReadingGoal).
+      console.error("Biyografi kaydedilemedi:", err);
+      setBioHata("Biyografi kaydedilemedi, tekrar dene.");
+    } finally {
+      setBioKaydediliyor(false);
+    }
+  }
 
   // Kendi yorumlarımı dinle. useReviews kitap bazlı çalıştığı için burada
   // ayrı, basit bir onSnapshot ile kullanıcı bazlı sorgu yapıyoruz.
@@ -65,7 +102,63 @@ export default function ProfilePage() {
         </div>
         <div className="profile-kunye">
           <h1>{currentUser.name}</h1>
-          <p className="hint">{currentUser.bio}</p>
+
+          {bioDuzenleniyor ? (
+            <div className="bio-form">
+              <textarea
+                value={bioTaslak}
+                maxLength={BIO_SINIRI}
+                placeholder="Kendini birkaç cümleyle tanıt"
+                aria-label="Biyografi"
+                autoFocus
+                onChange={(e) => setBioTaslak(e.target.value)}
+              />
+              <div className="bio-form-foot">
+                {/* Sınır kuraldakiyle (500) aynı — burada aşılamaz zaten,
+                    ama kaç karakter kaldığını görmek yazarken rahatlatır. */}
+                <span className="hint bio-sayac">
+                  {bioTaslak.length} / {BIO_SINIRI}
+                </span>
+                <div className="bio-form-actions">
+                  <button
+                    className="btn-ghost"
+                    type="button"
+                    disabled={bioKaydediliyor}
+                    onClick={bioVazgec}
+                  >
+                    Vazgeç
+                  </button>
+                  <button
+                    className="btn-primary"
+                    type="button"
+                    disabled={bioKaydediliyor}
+                    onClick={bioKaydet}
+                  >
+                    {bioKaydediliyor ? "Kaydediliyor…" : "Kaydet"}
+                  </button>
+                </div>
+              </div>
+              {bioHata && <p className="hint error">{bioHata}</p>}
+            </div>
+          ) : (
+            <>
+              {/* Boş biyografide "henüz yok" demeden önce doldurma daveti —
+                  bu satır kişisel bir alan, sitenin genel "boş durumu hiç
+                  gösterme" kuralı burada geçerli değil: kullanıcı burada her
+                  zaman kendi profilini görüyor, davet anlamsız değil. */}
+              <p className="hint">
+                {currentUser.bio || "Henüz bir tanıtım yazmadın."}
+              </p>
+              <button
+                className="btn-ghost bio-duzenle-btn"
+                type="button"
+                onClick={bioDuzenlemeyeBasla}
+              >
+                Profili düzenle
+              </button>
+            </>
+          )}
+
           <p className="book-recs">{myBooks.length} kitap önerdin</p>
         </div>
       </div>

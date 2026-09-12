@@ -71,6 +71,9 @@ interface AppState {
   markChatSeen: () => Promise<void>;
   // Kullanıcı yıllık okuma hedefini belirler/değiştirir (users/{uid}.readingGoal).
   setReadingGoal: (goal: number) => Promise<void>;
+  // Kullanıcı kendi biyografisini günceller (users/{uid}.bio). Kurallar
+  // 500 karakter sınırı ve string tipini ayrıca zorunlu kılıyor.
+  setBio: (bio: string) => Promise<void>;
   // Uygulama düzeyindeki dinleyicilerin (kitaplar, yazarlar) durumu.
   // Koleksiyonlar `[]` diye başladığı için sayfalar "veri yok" ile "henüz
   // gelmedi"yi ayırt edemiyor ve yükleme sırasında yanlış şey söylüyorlardı
@@ -415,6 +418,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await updateDoc(doc(db, "users", currentUser.id), { readingGoal: goal });
   }
 
+  // Biyografiyi kaydeder. Diğer users/{uid} yazmaları gibi (updateAvatar,
+  // setFigure) önce yerelde yansıtılır — currentUser gerçek zamanlı
+  // dinlenmediği için bu olmazsa profil, kaydettikten sonra bile eski
+  // biyografiyi göstermeye devam eder. `updateDoc` reddedilirse hatayı
+  // çağıran (ProfilePage) yakalar; burada yutulmaz.
+  async function setBio(bio: string) {
+    if (!currentUser) return;
+    setCurrentUser((prev) => (prev ? { ...prev, bio } : prev));
+    await updateDoc(doc(db, "users", currentUser.id), { bio });
+  }
+
   // Firebase'den giriş durumu gelene kadar kısa bir yükleniyor ekranı
   if (!authReady) {
     return <div className="section loading">Yükleniyor…</div>;
@@ -442,6 +456,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setApproved,
         markChatSeen,
         setReadingGoal,
+        setBio,
         veriDurumu,
       }}
     >

@@ -2781,6 +2781,38 @@ textarea {
   color: var(--muted);
 }
 
+/* --- Biyografi düzenleme --- */
+.profil .bio-duzenle-btn {
+  margin-top: 0.6rem;
+  /* Diğer sayfalardaki .btn-ghost daha büyük dolgu kullanıyor; künye
+     satırının içinde küçük ikincil bir eylem olarak dursun diye daraltıldı. */
+  padding: 0.4rem 0.8rem;
+  font-size: var(--fs-caption);
+}
+.profil .bio-form {
+  margin-top: 0.6rem;
+  max-width: 56ch; /* .profile-kunye .hint ile aynı satır uzunluğu */
+}
+.profil .bio-form textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+.profil .bio-form-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+.profil .bio-sayac {
+  font-size: var(--fs-caption);
+}
+.profil .bio-form-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
 /* --- Bölüm başlıkları ve ritim --- */
 /* Sayfada h1'in ardından sekiz ile dokuz tane --fs-h2 (34px) başlık vardı;
    hiçbir bölüm diğerinden ayrışmıyordu. */
