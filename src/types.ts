@@ -24,6 +24,11 @@ export interface Book {
   description: string;
   // Bu kitabı öneren kullanıcıların id'leri
   recommendedBy: string[];
+  // Bu kitabı favorilerine ekleyen kullanıcıların id'leri. `recommendedBy`
+  // "kulübe önerdim" demek, bu "kişisel favorimdir" demek — ikisi ayrı.
+  // Alan yeni: veritabanındaki eski kitap kayıtlarında hiç yok, bu yüzden
+  // isteğe bağlı — okuyan her yer `book.favoritedBy ?? []` kullanmalı.
+  favoritedBy?: string[];
   // Firestore'a eklenme zamanı (ms). En yeniyi üste sıralamak için kullanılır.
   createdAt?: number;
 }

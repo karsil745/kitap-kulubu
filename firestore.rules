@@ -75,19 +75,37 @@ service cloud.firestore {
         && request.resource.data.recommendedBy == [request.auth.uid]
       );
 
-      // Sıradan üye SADECE kendi önerisini ekler/çıkarır; başka hiçbir alana
-      // dokunamaz. Aksi halde herkes her kitabın adını/açıklamasını/kapağını
-      // ezebilir ve başkalarının önerilerini silebilirdi.
+      // Sıradan üye SADECE kendi önerisini ya da kendi favori işaretini
+      // ekler/çıkarır (tek seferde ikisinden biri, ikisi birden değil);
+      // başka hiçbir alana dokunamaz. Aksi halde herkes her kitabın
+      // adını/açıklamasını/kapağını ezebilir ve başkalarının
+      // önerilerini/favorilerini silebilirdi.
+      // `favoritedBy` projeye sonradan eklendi: eski kayıtlarda hiç yok,
+      // bu yüzden `resource.data.get('favoritedBy', [])` ile eksik alan
+      // boş dizi sayılıyor — yoksa ilk favori eklemede kural patlardı.
       allow update: if isAdmin() || (
         isMember()
-        && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['recommendedBy'])
-        && request.resource.data.recommendedBy.toSet()
-             .difference(resource.data.recommendedBy.toSet())
-             .hasOnly([request.auth.uid])
-        && resource.data.recommendedBy.toSet()
-             .difference(request.resource.data.recommendedBy.toSet())
-             .hasOnly([request.auth.uid])
+        && (
+          (
+            request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['recommendedBy'])
+            && request.resource.data.recommendedBy.toSet()
+                 .difference(resource.data.recommendedBy.toSet())
+                 .hasOnly([request.auth.uid])
+            && resource.data.recommendedBy.toSet()
+                 .difference(request.resource.data.recommendedBy.toSet())
+                 .hasOnly([request.auth.uid])
+          ) || (
+            request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['favoritedBy'])
+            && request.resource.data.favoritedBy.toSet()
+                 .difference(resource.data.get('favoritedBy', []).toSet())
+                 .hasOnly([request.auth.uid])
+            && resource.data.get('favoritedBy', []).toSet()
+                 .difference(request.resource.data.favoritedBy.toSet())
+                 .hasOnly([request.auth.uid])
+          )
+        )
       );
 
       // Silme sadece yöneticide — arama sonucundan yanlış/mükerrer eklenen

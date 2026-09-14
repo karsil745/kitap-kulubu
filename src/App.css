@@ -821,6 +821,11 @@ textarea {
   flex-wrap: wrap;
   margin-top: 1.2rem;
 }
+/* .chip'in varsayılan margin-right'ı (.filters'taki gibi) burada da
+   gap'in üstüne binip favori butonunu gereksiz sağa iterdi. */
+.recommend-box .chip {
+  margin-right: 0;
+}
 .recommend-hint {
   font-size: var(--fs-caption);
 }

@@ -54,6 +54,8 @@ interface AppState {
   ) => Promise<void>;
   // Var olan bir kitabı önerenler listesine ekler/çıkarır
   toggleRecommend: (bookId: string) => Promise<void>;
+  // Bir kitabı kendi favorilerine ekler/çıkarır (recommendedBy'den ayrı)
+  toggleFavorite: (bookId: string) => Promise<void>;
   // Yönetici bir kitabı siler (yanlış/mükerrer kayıtları temizlemek için)
   deleteBook: (bookId: string) => Promise<void>;
   // Yönetici kitap künyesini düzeltir (sayfa sayısı, yıl, ad…)
@@ -321,6 +323,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  // toggleRecommend ile birebir aynı desen, ayrı alan: "kulübe önerdim"
+  // (recommendedBy) ile "kişisel favorimdir" (favoritedBy) farklı şeyler,
+  // biri diğerini tetiklemiyor.
+  async function toggleFavorite(bookId: string) {
+    if (!currentUser || !isMember) return;
+    const book = books.find((b) => b.id === bookId);
+    if (!book) return;
+    const has = (book.favoritedBy ?? []).includes(currentUser.id);
+    await updateDoc(doc(db, "books", bookId), {
+      favoritedBy: has
+        ? arrayRemove(currentUser.id)
+        : arrayUnion(currentUser.id),
+    });
+  }
+
   // Kitabı siler. Sadece yönetici — arama sonucundan yanlış/mükerrer eklenen
   // kayıtları (aynı kitabın üç farklı yazımı gibi) temizlemek için.
   // Not: Firestore kuralları da bunu isAdmin() ile ayrıca zorunlu kılar.
@@ -448,6 +465,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         logout,
         addBook,
         toggleRecommend,
+        toggleFavorite,
         deleteBook,
         updateBook,
         ensureAuthor,

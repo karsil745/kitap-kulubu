@@ -85,6 +85,9 @@ export default function ProfilePage() {
   const myBooks = books.filter((b) =>
     b.recommendedBy.includes(currentUser.id)
   );
+  const favoriteBooks = books.filter((b) =>
+    (b.favoritedBy ?? []).includes(currentUser.id)
+  );
 
   // Raf durumuna göre kitapları grupla.
   const readBooks = books.filter((b) => statusOf(b.id) === "read");
@@ -194,6 +197,22 @@ export default function ProfilePage() {
         <h2>Rozetlerim</h2>
       </div>
       <BadgeList userId={currentUser.id} />
+
+      <div className="section-head">
+        <h2>Favori kitaplarım</h2>
+      </div>
+      {favoriteBooks.length === 0 ? (
+        <p className="empty">
+          Henüz favori işaretlemedin. Bir kitabın sayfasında ☆ Favorilerime
+          ekle'ye bas.
+        </p>
+      ) : (
+        <div className="book-grid">
+          {favoriteBooks.map((b) => (
+            <BookCard key={b.id} book={b} />
+          ))}
+        </div>
+      )}
 
       <div className="section-head">
         <h2>Okuduklarım</h2>

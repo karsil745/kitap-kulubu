@@ -24,6 +24,7 @@ export default function BookDetailPage() {
     currentUser,
     isMember,
     toggleRecommend,
+    toggleFavorite,
     users,
     authors,
     isAdmin,
@@ -80,6 +81,11 @@ export default function BookDetailPage() {
   const author = authors.find((a) => a.id === book.authorId);
   const iRecommend = currentUser
     ? book.recommendedBy.includes(currentUser.id)
+    : false;
+  // "Önerdim" (kulübe okunsun diye) ile "favorim" (kişisel beğeni) ayrı
+  // alanlar — biri diğerini değiştirmez.
+  const iFavorite = currentUser
+    ? (book.favoritedBy ?? []).includes(currentUser.id)
     : false;
 
   // Bu kitabı öneren üyelerin isimleri
@@ -158,6 +164,31 @@ export default function BookDetailPage() {
                 }
               >
                 {iRecommend ? "✓ Önerdin" : "👍 Bu kitabı öner"}
+              </button>
+              {/* Öneriden ayrı, kişisel bir işaret: "kulübe önerdim" değil
+                  "bu benim favorim". Chip dili kullanılıyor — btn-primary
+                  yanında ikinci bir dolgulu buton fazla ağır dururdu, chip
+                  ikincil eylem hiyerarşisine (bkz. ShelfPicker) daha uygun. */}
+              <button
+                type="button"
+                className={iFavorite ? "chip active" : "chip"}
+                aria-pressed={iFavorite}
+                onClick={async () => {
+                  setYazmaHatasi("");
+                  try {
+                    await toggleFavorite(book.id);
+                  } catch (err) {
+                    console.error("Favori kaydedilemedi:", err);
+                    setYazmaHatasi("Favori kaydedilemedi, tekrar dene.");
+                  }
+                }}
+                title={
+                  iFavorite
+                    ? "Favorilerden çıkarmak için tıkla"
+                    : "Favorilerine ekle"
+                }
+              >
+                {iFavorite ? "★ Favorimde" : "☆ Favorilerime ekle"}
               </button>
               {iRecommend && (
                 <span className="hint recommend-hint">
