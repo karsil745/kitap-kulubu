@@ -1,14 +1,15 @@
 import { useState } from "react";
 import type { KeyboardEvent } from "react";
 import { useApp } from "../context/AppContext";
-import { useMyShelves } from "../hooks/useShelves";
+import type { Shelf } from "../types";
 
 // Profildeki yıllık okuma hedefi: kaç kitap hedeflendi, bu yıl kaçı bitti.
 // Ayrı bir "hedef" koleksiyonu yok — sayı doğrudan users/{uid}.readingGoal'da,
 // ilerleme de zaten var olan raf kayıtlarından (shelves) sayılıyor.
-export default function ReadingGoal() {
+// Raflar prop olarak geliyor: ProfilePage zaten useMyShelves() ile dinliyor,
+// burada ikinci bir onSnapshot açılmasın.
+export default function ReadingGoal({ shelves }: { shelves: Shelf[] }) {
   const { currentUser, setReadingGoal } = useApp();
-  const { shelves } = useMyShelves();
   const [taslak, setTaslak] = useState("");
   const [hata, setHata] = useState("");
 

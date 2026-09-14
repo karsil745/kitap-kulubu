@@ -19,7 +19,7 @@ const BIO_SINIRI = 500; // firestore.rules: shortText(bio, 500)
 
 export default function ProfilePage() {
   const { currentUser, books, updateAvatar, setBio } = useApp();
-  const { statusOf } = useMyShelves();
+  const { shelves, statusOf } = useMyShelves();
   const [myReviews, setMyReviews] = useState<Review[]>([]);
   usePageTitle("Profilim");
 
@@ -166,7 +166,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <ReadingGoal />
+      <ReadingGoal shelves={shelves} />
 
       {/* Yönetici değilsen bu bölüm hiç render edilmez */}
       <MemberApprovals />
