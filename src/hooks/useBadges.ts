@@ -3,7 +3,7 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useApp } from "../context/AppContext";
 import { ERAS } from "../data/mockData";
-import type { Answer, Badge, Katilim, Quote, Review, Shelf, Vote } from "../types";
+import type { Answer, Badge, Katilim, Quote, Shelf, Vote } from "../types";
 
 // UI'ın kazanılan/kilitli rozetleri ayırt edebilmesi için yerel tip.
 export type EarnedBadge = Badge & { earned: boolean };
@@ -41,9 +41,14 @@ function isNextMonth(prev: string, next: string): boolean {
 // yazma/koleksiyon yoktur, sadece öneri/raf/yorum/oy/alıntı/katılım/cevap
 // sayıları hesaplanır.
 export function useBadges(userId: string): EarnedBadge[] {
-  const { books, users } = useApp();
+  const { books, users, reviews: tumYorumlar } = useApp();
   const [shelves, setShelves] = useState<Shelf[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
+  // Kullanıcının yorumları — AppContext tüm yorumları zaten dinliyor,
+  // ayrı bir onSnapshot açmak yerine süzülüyor.
+  const reviews = useMemo(
+    () => (userId ? tumYorumlar.filter((r) => r.userId === userId) : []),
+    [tumYorumlar, userId]
+  );
   const [votes, setVotes] = useState<Vote[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [katilim, setKatilim] = useState<Katilim[]>([]);
@@ -64,20 +69,6 @@ export function useBadges(userId: string): EarnedBadge[] {
     return unsub;
   }, [userId]);
 
-  // Kullanıcının yorumlarını dinle.
-  useEffect(() => {
-    if (!userId) {
-      setReviews([]);
-      return;
-    }
-    const q = query(collection(db, "reviews"), where("userId", "==", userId));
-    const unsub = onSnapshot(
-      q,
-      (snap) => setReviews(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Review))),
-      (err) => console.error("Rozetler için yorumlar dinlenemedi:", err)
-    );
-    return unsub;
-  }, [userId]);
 
   // Kullanıcının oylarını dinle (koleksiyon henüz boş olabilir, sorun değil).
   useEffect(() => {

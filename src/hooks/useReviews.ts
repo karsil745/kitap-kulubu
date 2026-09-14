@@ -1,32 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
-import { collection, deleteDoc, doc, onSnapshot, query, setDoc, where } from "firebase/firestore";
+import { useMemo } from "react";
+import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useApp } from "../context/AppContext";
-import type { Review } from "../types";
 
 // Bir kitabın tüm puan/yorumlarını gerçek zamanlı yönetir.
 // Doc id'si deterministik: `${bookId}__${userId}` — böylece bir kullanıcı
 // bir kitaba en fazla bir yorum yazabilir; tekrar gönderim güncelleme olur.
 export function useReviews(bookId: string) {
-  const { currentUser, isMember, isAdmin } = useApp();
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const { currentUser, isMember, isAdmin, reviews: tumYorumlar } = useApp();
 
-  // Bu kitaba ait yorumları dinle — en yeni üstte olacak şekilde sırala.
-  useEffect(() => {
-    const q = query(collection(db, "reviews"), where("bookId", "==", bookId));
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        const list = snap.docs.map(
-          (d) => ({ id: d.id, ...d.data() } as Review)
-        );
-        list.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0)); // En yeni üstte
-        setReviews(list);
-      },
-      (err) => console.error("Yorumlar dinlenemedi:", err)
-    );
-    return unsub;
-  }, [bookId]);
+  // Bu kitaba ait yorumlar — AppContext tüm koleksiyonu zaten dinliyor,
+  // burada ikinci bir onSnapshot açmak yerine süzülüyor. En yeni üstte.
+  const reviews = useMemo(
+    () =>
+      tumYorumlar
+        .filter((r) => r.bookId === bookId)
+        .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0)),
+    [tumYorumlar, bookId]
+  );
 
   const myReview = useMemo(
     () =>

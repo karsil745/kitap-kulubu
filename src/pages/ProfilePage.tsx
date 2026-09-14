@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { auth, db } from "../lib/firebase";
+import { auth } from "../lib/firebase";
 import { useApp } from "../context/AppContext";
 import { useMyShelves } from "../hooks/useShelves";
 import { usePageTitle } from "../hooks/usePageTitle";
@@ -11,16 +10,14 @@ import ReadingGoal from "../components/ReadingGoal";
 import StarRating from "../components/StarRating";
 import Avatar from "../components/Avatar";
 import MemberApprovals from "../components/MemberApprovals";
-import type { Review } from "../types";
 
 // Kullanıcının kendi profili: bilgileri + rafları + rozetleri + önerdiği
 // kitaplar + verdiği yorumlar.
 const BIO_SINIRI = 500; // firestore.rules: shortText(bio, 500)
 
 export default function ProfilePage() {
-  const { currentUser, books, updateAvatar, setBio } = useApp();
+  const { currentUser, books, reviews, updateAvatar, setBio } = useApp();
   const { shelves, statusOf } = useMyShelves();
-  const [myReviews, setMyReviews] = useState<Review[]>([]);
   usePageTitle("Profilim");
 
   // Biyografi düzenleme: taslak yalnızca düzenleme moduna girerken
@@ -58,29 +55,15 @@ export default function ProfilePage() {
     }
   }
 
-  // Kendi yorumlarımı dinle. useReviews kitap bazlı çalıştığı için burada
-  // ayrı, basit bir onSnapshot ile kullanıcı bazlı sorgu yapıyoruz.
-  useEffect(() => {
-    if (!currentUser) {
-      setMyReviews([]);
-      return;
-    }
-    const q = query(collection(db, "reviews"), where("userId", "==", currentUser.id));
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        const list = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Review));
-        list.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0)); // En yeni üstte
-        setMyReviews(list);
-      },
-      (err) => console.error("Yorumlarım dinlenemedi:", err)
-    );
-    return unsub;
-  }, [currentUser]);
-
   // Giriş yapılmadıysa giriş sayfasına yönlendir
   if (!currentUser)
     return <Navigate to="/giris" state={{ from: "/profil" }} replace />;
+
+  // Kendi yorumlarım — AppContext tüm yorumları zaten dinliyor, burada
+  // yalnızca süzülüyor. En yeni üstte.
+  const myReviews = reviews
+    .filter((r) => r.userId === currentUser.id)
+    .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
 
   const myBooks = books.filter((b) =>
     b.recommendedBy.includes(currentUser.id)
