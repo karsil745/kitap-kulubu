@@ -40,9 +40,11 @@ function isNextMonth(prev: string, next: string): boolean {
 // Verilen kullanıcının rozetlerini mevcut veriden türetir — ayrı bir
 // yazma/koleksiyon yoktur, sadece öneri/raf/yorum/oy/alıntı/katılım/cevap
 // sayıları hesaplanır.
-export function useBadges(userId: string): EarnedBadge[] {
+// `shelves` çağırandan geliyor ve `userId`'ye ait olmalı: ProfilePage rafları
+// zaten useMyShelves() ile dinliyor, burada ikinci bir onSnapshot açılmasın.
+// Başka birinin profilinde rozet gösterilirse o kişinin rafları verilmeli.
+export function useBadges(userId: string, shelves: Shelf[]): EarnedBadge[] {
   const { books, users, reviews: tumYorumlar } = useApp();
-  const [shelves, setShelves] = useState<Shelf[]>([]);
   // Kullanıcının yorumları — AppContext tüm yorumları zaten dinliyor,
   // ayrı bir onSnapshot açmak yerine süzülüyor.
   const reviews = useMemo(
@@ -53,21 +55,6 @@ export function useBadges(userId: string): EarnedBadge[] {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [katilim, setKatilim] = useState<Katilim[]>([]);
   const [answers, setAnswers] = useState<Answer[]>([]);
-
-  // Kullanıcının raflarını dinle (okunan sayısı, sayfa toplamı, dönem çeşitliliği için).
-  useEffect(() => {
-    if (!userId) {
-      setShelves([]);
-      return;
-    }
-    const q = query(collection(db, "shelves"), where("userId", "==", userId));
-    const unsub = onSnapshot(
-      q,
-      (snap) => setShelves(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Shelf))),
-      (err) => console.error("Rozetler için raflar dinlenemedi:", err)
-    );
-    return unsub;
-  }, [userId]);
 
 
   // Kullanıcının oylarını dinle (koleksiyon henüz boş olabilir, sorun değil).

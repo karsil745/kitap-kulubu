@@ -179,7 +179,7 @@ export default function ProfilePage() {
       <div className="section-head">
         <h2>Rozetlerim</h2>
       </div>
-      <BadgeList userId={currentUser.id} />
+      <BadgeList userId={currentUser.id} shelves={shelves} />
 
       <div className="section-head">
         <h2>Favori kitaplarım</h2>

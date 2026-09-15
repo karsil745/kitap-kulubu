@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { useBadges } from "../hooks/useBadges";
+import type { Shelf } from "../types";
 import { BADGE_ICON_PATHS, BADGE_INK_GRAIN_BASE64 } from "../lib/badgeIcons";
 
 // Her rozetin sabit bir "duruşu" var — gerçek bir mühür aletinin her
@@ -25,8 +26,14 @@ function seenKey(userId: string) {
 // Daha önce görülmemiş yeni bir rozet kazanılınca bir kereliğine "basılma"
 // animasyonuyla beliriyor — hangi rozetlerin görüldüğü tarayıcıda
 // (localStorage) tutuluyor, Firestore'a yeni bir alan yazılmıyor.
-export default function BadgeList({ userId }: { userId: string }) {
-  const badges = useBadges(userId);
+export default function BadgeList({
+  userId,
+  shelves,
+}: {
+  userId: string;
+  shelves: Shelf[];
+}) {
+  const badges = useBadges(userId, shelves);
   const [justEarned, setJustEarned] = useState<Set<string>>(new Set());
   const seeded = useRef(false);
 
