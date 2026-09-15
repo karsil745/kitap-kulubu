@@ -10,20 +10,32 @@ import StarRating from "./StarRating";
 export default function BookCard({
   book,
   index,
+  puan,
 }: {
   book: Book;
   index?: number;
+  // Katalog ortalamaları zaten hesaplıyor ve buradan veriyor; puanı olmayan
+  // kitap için null gelir. Prop hiç verilmezse (profil, yazar sayfası) puan
+  // aşağıda yorum listesinden hesaplanır.
+  puan?: { ortalama: number; adet: number } | null;
 }) {
   const { authors, reviews } = useApp();
   const author = authors.find((a) => a.id === book.authorId);
 
-  // Bu kitabın ortalama puanı — tüm değerlendirmelerden hesaplanır.
-  const bookReviews = reviews.filter((r) => r.bookId === book.id);
-  const count = bookReviews.length;
-  const average =
-    count > 0
-      ? bookReviews.reduce((sum, r) => sum + r.rating, 0) / count
-      : 0;
+  let count: number;
+  let average: number;
+  if (puan !== undefined) {
+    // Hazır değer geldi (null = puan yok): yorum listesi hiç taranmaz.
+    count = puan?.adet ?? 0;
+    average = puan?.ortalama ?? 0;
+  } else {
+    const bookReviews = reviews.filter((r) => r.bookId === book.id);
+    count = bookReviews.length;
+    average =
+      count > 0
+        ? bookReviews.reduce((sum, r) => sum + r.rating, 0) / count
+        : 0;
+  }
 
   return (
     <Link to={`/kitap/${book.id}`} className="book-card">

@@ -33,7 +33,8 @@ export default function BooksPage() {
   );
   const eraChips = [...ERAS, ...extraEras];
 
-  // Kitap başına ortalama puan — hem sıralama hem sayaç için bir kez hesaplanır.
+  // Kitap başına ortalama puan ve yorum sayısı — hem sıralama hem kartlar
+  // için bir kez hesaplanır (kartlar yorum listesini ayrıca taramasın).
   const ortalamalar = useMemo(() => {
     const toplam = new Map<string, { top: number; adet: number }>();
     for (const r of reviews) {
@@ -42,8 +43,9 @@ export default function BooksPage() {
       t.adet += 1;
       toplam.set(r.bookId, t);
     }
-    const out = new Map<string, number>();
-    for (const [id, t] of toplam) out.set(id, t.top / t.adet);
+    const out = new Map<string, { ortalama: number; adet: number }>();
+    for (const [id, t] of toplam)
+      out.set(id, { ortalama: t.top / t.adet, adet: t.adet });
     return out;
   }, [reviews]);
 
@@ -67,7 +69,8 @@ export default function BooksPage() {
       case "puan":
         // Puanı olmayanlar sona düşsün — 0 puanlı gibi görünmesinler.
         sirali.sort(
-          (a, b) => (ortalamalar.get(b.id) ?? -1) - (ortalamalar.get(a.id) ?? -1)
+          (a, b) => (ortalamalar.get(b.id)?.ortalama ?? -1) -
+            (ortalamalar.get(a.id)?.ortalama ?? -1)
         );
         break;
       case "ad":
@@ -205,7 +208,7 @@ export default function BooksPage() {
       ) : (
         <div className="book-grid">
           {filtered.map((b) => (
-            <BookCard key={b.id} book={b} />
+            <BookCard key={b.id} book={b} puan={ortalamalar.get(b.id) ?? null} />
           ))}
         </div>
       )}
