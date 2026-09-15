@@ -58,6 +58,25 @@ Tekrarlanan üç kalıp — yeni kod yazarken bunlara uy:
    günün sözü (`useQuoteOfTheDay`) ayrı koleksiyon tutmaz; mevcut
    kayıtlardan hesaplanır. Yeni bir "aktivite" ya da "rozet" koleksiyonu açma.
 
+### Kitap–kullanıcı ilişkisi: üç ayrı model (bilerek)
+
+| Veri | Nerede | Okuma |
+|---|---|---|
+| Raf durumu, ilerleme | `shelves/{uid}__{bookId}` | Yalnızca üyeler |
+| Öneri | `books.recommendedBy[]` | Herkese açık |
+| Favori | `books.favoritedBy[]` | Herkese açık |
+
+Bunları tek modelde birleştirme (2026-09-15 kararı). Öneri herkese açık bir
+sosyal sinyal (kartlar, "Önerenler", sıralama); `shelves`'e taşınırsa
+ziyaretçi bunları göremez. Raf ise kişisel ve girişe bağlı. Birleştirmek
+yazma yollarını, kuralları ve veri taşımayı gerektirir, kazancı yalnızca
+düzen olur.
+
+Favorilerin kitap belgesinde, yani **herkese açık** durması da bilinçli bir
+kabul. Favoriler özel olsun istenirse yol: raf belgesine `favorite` alanı
+eklemek (kurallar, `toggleFavorite`, BookDetailPage, ProfilePage değişir ve
+mevcut `favoritedBy` verisi taşınır).
+
 ### Yetki
 
 `isMember` (üye, yazabilir) ve `isAdmin` (yönetici) `users/{uid}` belgesindeki
