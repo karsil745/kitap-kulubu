@@ -2347,8 +2347,11 @@ textarea {
    Seçici `.hero h1` ile aynı özgüllükte olmalı, yoksa üstteki kural eziyor. */
 .hero h1.hero-title-book {
   font-size: var(--fs-display);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  /* 600 / -0.02em'de Fraunces iri boyutta küt ve sıkışık görünüyordu
+     ("J", "y" kuyrukları topaklanıyor, "ne"/"Ey" yapışıyordu). 500 hâlâ
+     sayfanın en baskın metni, ama harfler nefes alıyor (2026-09-18). */
+  font-weight: 500;
+  letter-spacing: -0.01em;
   /* `anywhere`, `break-word`den farklı olarak ögenin en küçük içerik
      genişliğini de düşürür; esnek kutu ancak böyle daraltabiliyor. */
   overflow-wrap: anywhere;
@@ -2382,6 +2385,97 @@ textarea {
 .hero-leader-name {
   color: var(--ink);
   font-style: normal;
+}
+
+/* --- Ayın kitabı: sahne, ilerleme, ana çağrı (2026-09-18) --- */
+/* Boşluk bir basamak daraldı: kart artık ilerleme satırıyla doluyor, eski
+   taban yükseklik kısa açıklamalı kitaplarda ölü boşluk bırakıyordu. */
+.hero {
+  min-height: min(50vh, 430px);
+}
+.hero-desc {
+  margin-bottom: 1.4rem;
+}
+
+/* Sahne: kapağın arkasında, kapağın kendi renklerinden süzülmüş çok hafif
+   bir yıkama. Kartın tamamına görsel koymak 2026-08-16'da geri alındı
+   (PLAN-HAREKET.md) — bu yalnızca kapak sütununda, metne dokunmuyor.
+   Gradyan ya da parlama yok: kapak görseli bulanıklaştırılıp soluklaştırılıyor,
+   kapak resmi yoksa yalnızca sıcak kâğıt tonu kalıyor. */
+.hero-sahne {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(1.4rem, 3vw, 2.4rem);
+  border-radius: var(--radius-lg);
+  background: var(--accent-tint);
+}
+.hero-sahne::before {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  z-index: -1;
+  background-image: var(--sahne-kapak, none);
+  background-size: cover;
+  background-position: center;
+  filter: blur(40px) saturate(0.85);
+  opacity: 0.55;
+}
+:root[data-theme="dark"] .hero-sahne::before {
+  opacity: 0.35;
+}
+/* Sahnede kapak odak noktası: gölge biraz daha derin ve yakın */
+.hero-sahne .hero-book img {
+  box-shadow: 0 34px 60px -24px rgba(30, 20, 12, 0.6),
+    0 6px 14px -6px rgba(30, 20, 12, 0.3);
+}
+
+/* Etiketin "Bu ayın kitabı" kısmı vurgu renginde: ay bilgisi künye olarak
+   soluk kalır, bölümün ne olduğu ilk bakışta okunur. */
+.hero-eyebrow-vurgu {
+  color: var(--accent);
+}
+
+/* Kulüp okuma ilerlemesi: kutusuz, künye dilinde bir satır grubu */
+.kulup-ilerleme {
+  max-width: 380px;
+  margin: 0 0 1.7rem;
+}
+.kulup-ilerleme-bas {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.kulup-ilerleme-etiket {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--fs-label);
+  font-weight: 700;
+}
+.kulup-ilerleme-yuzde {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  line-height: 1;
+  color: var(--ink);
+}
+.kulup-ilerleme-cubuk {
+  display: block;
+  height: 6px;
+  margin: 0.55rem 0 0.5rem;
+}
+.kulup-ilerleme-not {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-caption);
+}
+
+/* Ana çağrı: bölümün tek dolgulu ve en iri eylemi */
+.hero .hero-cta-ana {
+  padding: 0.95rem 2rem;
+  font-size: 0.8rem;
+  box-shadow: var(--shadow);
 }
 
 /* Bölüm başlığı: kılcal çizgi kalıyor (editoryal iz), ama koyu değil açık ton */

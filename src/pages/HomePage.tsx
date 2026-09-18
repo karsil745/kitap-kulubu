@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import { useBookShelves } from "../hooks/useShelves";
 import { useSchedule } from "../hooks/useSchedule";
 import { useVoting } from "../hooks/useVoting";
 import { useKatilim } from "../hooks/useKatilim";
@@ -14,6 +16,73 @@ import ReadingHistory from "../components/ReadingHistory";
 // Hero giriş animasyonu oturumda BİR KEZ oynar. Modül düzeyinde tutuluyor:
 // ana sayfaya her dönüşte bileşen yeniden kurulur, bu bayrak kurulmaz.
 let heroGirisiOynadi = false;
+
+// Kulüp okuma ilerlemesi — gerçek raf kayıtlarından (shelves) hesaplanır,
+// ayrı bir koleksiyon yok. Kitabı "okuyorum" ya da "okudum" diye rafına almış
+// üyelerin ortalaması: okuyanın kendi yüzdesi, bitirenin %100'ü.
+// Raflar girişe bağlı: ziyaretçide dinleyici açılmaz, sayı yerine davet çıkar.
+function KulupIlerlemesi({ bookId }: { bookId: string }) {
+  const { currentUser } = useApp();
+  const shelves = useBookShelves(bookId);
+
+  const okuyan = shelves.filter((s) => s.status === "reading").length;
+  const bitiren = shelves.filter((s) => s.status === "read").length;
+  const katilan = okuyan + bitiren;
+  const yuzde =
+    katilan > 0
+      ? Math.round(
+          shelves.reduce(
+            (top, s) =>
+              top +
+              (s.status === "read"
+                ? 100
+                : s.status === "reading"
+                  ? (s.progress ?? 0)
+                  : 0),
+            0
+          ) / katilan
+        )
+      : 0;
+
+  return (
+    <div className="kulup-ilerleme">
+      <div className="kulup-ilerleme-bas">
+        <span className="kulup-ilerleme-etiket">Kulüp okuma ilerlemesi</span>
+        {katilan > 0 && <span className="kulup-ilerleme-yuzde">%{yuzde}</span>}
+      </div>
+      <span
+        className="progress-track kulup-ilerleme-cubuk"
+        role="progressbar"
+        aria-label="Kulüp okuma ilerlemesi"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={yuzde}
+      >
+        <span className="progress-fill" style={{ width: `${yuzde}%` }} />
+      </span>
+      <p className="kulup-ilerleme-not">
+        {!currentUser ? (
+          <>
+            Kulübün bu kitapta nerede olduğunu görmek için{" "}
+            <Link to="/giris" state={{ from: `/kitap/${bookId}` }}>
+              giriş yap
+            </Link>
+            .
+          </>
+        ) : katilan === 0 ? (
+          <>
+            Henüz kimse okumaya başlamadı.{" "}
+            <Link to={`/kitap/${bookId}`}>Rafına ekleyen ilk sen ol →</Link>
+          </>
+        ) : (
+          [okuyan > 0 && `${okuyan} üye okuyor`, bitiren > 0 && `${bitiren} üye bitirdi`]
+            .filter(Boolean)
+            .join(" · ")
+        )}
+      </p>
+    </div>
+  );
+}
 
 // Ana sayfanın tek bir işi var: bu ay ne okuyoruz, ne zaman buluşuyoruz.
 // "En çok önerilenler" (/kitaplar'ın kopyasıydı) ve "Kulüpte neler oluyor"
@@ -58,7 +127,18 @@ export default function HomePage() {
             kadar hayalet bir girinti bırakıp metni bölüm başlıklarından
             farklı bir sol kenara itiyordu. */}
         {heroBook && (
-          <div className="hero-cover">
+          // Sahne: kapağın arkasında, kapağın kendi renklerinden gelen çok
+          // hafif bir yıkama. Kartın tamamına görsel koymak 2026-08-16'da
+          // denenip geri alındı (PLAN-HAREKET.md); bu yalnızca kapak sütununda
+          // kalıyor, metnin zemini ve kontrastı değişmiyor.
+          <div
+            className={botm ? "hero-cover hero-sahne" : "hero-cover"}
+            style={
+              botm && heroBook.coverImage
+                ? ({ "--sahne-kapak": `url("${heroBook.coverImage}")` } as CSSProperties)
+                : undefined
+            }
+          >
             {botm ? (
               <Link to={`/kitap/${heroBook.id}`} className="hero-book">
                 <Cover book={heroBook} />
@@ -88,16 +168,18 @@ export default function HomePage() {
               {/* Ay tek başına, kitabın NEDEN orada olduğunu söylemiyor;
                   ikisi birlikte duruyor. */}
               <span className="hero-eyebrow">
-                Bu ayın kitabı · {monthLabel(month)}
+                <span className="hero-eyebrow-vurgu">Bu ayın kitabı</span> ·{" "}
+                {monthLabel(month)}
               </span>
               <h1 className="hero-title-book">{botm.title}</h1>
               <p className="hero-author">{botmAuthor?.name}</p>
               {gercekAciklama(botm.description) && (
                 <p className="hero-desc">{gercekAciklama(botm.description)}</p>
               )}
+              <KulupIlerlemesi bookId={botm.id} />
               <div className="hero-cta">
-                <Link to={`/kitap/${botm.id}`} className="btn-primary">
-                  İncele →
+                <Link to={`/kitap/${botm.id}`} className="btn-primary hero-cta-ana">
+                  Kitabı incele →
                 </Link>
                 <Link to="/takvim" className="hero-vote-link">
                   Okuma takvimi →
