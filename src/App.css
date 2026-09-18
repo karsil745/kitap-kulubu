@@ -2202,12 +2202,11 @@ textarea {
   .tabbar {
     display: flex;
   }
-  /* Arama tam genişlikte üstte, sıralama altında sağa yaslı */
-  .book-search {
-    flex: 1 0 100%;
-  }
+  /* Arama ve sıralama dar ekranda alt alta, ikisi de tam genişlikte. Eskiden
+     sıralama tek başına sağa yaslıydı ve sahipsiz duruyordu (2026-09-19). */
+  .book-search,
   .book-sort {
-    margin-left: auto;
+    flex: 1 0 100%;
   }
   /* Alt çubuğun altında kalan içerik olmasın */
   .container {
@@ -2912,6 +2911,51 @@ textarea {
   align-items: baseline;
   gap: 0.7rem;
   min-width: 0;
+}
+/* Sayaç ("10 kitap", "3 / 10 kitap") hiçbir genişlikte ikiye kırılmasın */
+.books-basligi .hint {
+  white-space: nowrap;
+}
+
+/* Sol eksen ana sayfayla aynı (2026-09-19): ana sayfada bütün metin kartın iç
+   boşluğu kadar içeride (--kart-ic-yatay) başlıyor, bu sayfa ise kenardan
+   başlıyordu — sayfa değişince sol kenar ~40px zıplıyordu. Araç çubuğu bir
+   kart; kendi iç boşluğu (1rem) kadar dışa taşıyor ki içindeki arama ve çipler
+   de başlık ve ızgarayla aynı hatta dursun. */
+.kitaplar-sayfasi {
+  padding-inline: var(--kart-ic-yatay);
+}
+.kitaplar-sayfasi .book-tools {
+  margin-inline: -1rem;
+}
+/* İç boşluk içerik alanını ~80px daralttı; 205px alt sınırla ızgara 5
+   sütundan 4'e düşüp kartlar büyüyordu. 185px ile 5 sütun ve eskiye en
+   yakın kart genişliği korunuyor (yalnızca bu sayfada). */
+.kitaplar-sayfasi .book-grid {
+  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+}
+@media (max-width: 640px) {
+  /* Dar ekranda ana sayfa da kenar boşluğunu sıfırlıyor; araç çubuğu kartı
+     ekran kenarına yapışmasın diye burada dışa taşımıyor. */
+  .kitaplar-sayfasi {
+    padding-inline: 0;
+  }
+  .kitaplar-sayfasi .book-tools {
+    margin-inline: 0;
+  }
+  /* Üstteki sayfa kuralı daha özgül; genel mobil 2 sütunu burada geri ver */
+  .kitaplar-sayfasi .book-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* Başlık + sayaç üst satırda, öneri/giriş ipucu altında tam genişlikte.
+     Üçü tek satıra zorlanınca sayaç ikiye, ipucu üç satıra bölünüyordu. */
+  .kitaplar-sayfasi .section-head {
+    flex-wrap: wrap;
+    row-gap: 0.4rem;
+  }
+  .kitaplar-sayfasi .section-head > .hint {
+    flex-basis: 100%;
+  }
 }
 .book-search-results,
 .add-form {

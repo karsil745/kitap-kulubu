@@ -60,8 +60,10 @@ export default function BookCard({
             ızgarada gereksiz gürültü yapıyordu. */}
         {count > 0 && (
           <p className="book-rating">
-            <StarRating value={average} readOnly />
-            <span className="book-rating-num">
+            <StarRating value={average} readOnly adet={count} />
+            {/* Görsel kısaltma; ekran okuyucu aynısını yıldızların
+                etiketinden ("… 2 değerlendirme") duyuyor. */}
+            <span className="book-rating-num" aria-hidden="true">
               {average.toFixed(1)} · {count}
             </span>
           </p>

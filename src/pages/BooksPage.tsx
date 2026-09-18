@@ -87,7 +87,8 @@ export default function BooksPage() {
   }, [books, authors, activeEra, arama, siralama, ortalamalar]);
 
   return (
-    <div className="section">
+    // `kitaplar-sayfasi`: sol eksen ve mobil başlık düzeni için kapsam sınıfı
+    <div className="section kitaplar-sayfasi">
       <div className="section-head">
         {/* Sayaç başlığın künyesi: `space-between` içinde ayrı bir esnek çocuk
             olarak dururken ziyaretçide en sağa fırlıyor, üye görünümünde ise
