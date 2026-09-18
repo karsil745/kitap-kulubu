@@ -2661,6 +2661,113 @@ textarea {
    başlıyor. Kartsız bölümlere aynı yatay boşluk veriliyor ki sayfadaki bütün
    metin tek bir düşey hatta otursun. */
 /* (Günün Sözü bu eksene katılmaz: ortalanmış kapanış dipnotu olarak kalıyor.) */
+/* Kitap sayfasında çapa hedefleri: yapışkan menünün altında kalmasınlar */
+#tartisma,
+#alintilar {
+  scroll-margin-top: 6rem;
+}
+
+/* --- Bu ay kulüpte (2026-09-18) --- */
+/* Ayın kitabının hemen altında: üç sütunlu bir künye, kart ya da pano değil.
+   Sütunlar arasında yalnızca kılcal dikey çizgi; zemin, çerçeve, gölge yok.
+   Sol eksen ve başlık ölçüsü "Şimdiye kadar okuduklarımız" ile aynı. Hero
+   artık kartsız olduğu için üst boşluk bölüm arasından küçük: ayın kitabının
+   devamı gibi okunsun. */
+.bu-ay-bolum {
+  padding-inline: var(--kart-ic-yatay);
+  margin-top: clamp(1.5rem, 3vw, 2.5rem);
+}
+.bu-ay-bolum .section-head h2 {
+  font-size: 1.18rem;
+  letter-spacing: -0.01em;
+}
+.bu-ay-giris {
+  margin: 0.35rem 0 0;
+  color: var(--ink-3);
+  font-size: var(--fs-meta);
+}
+.bu-ay-liste {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.bu-ay-oge {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.2rem clamp(1rem, 2.6vw, 2.2rem);
+  border-left: 1px solid var(--rule);
+}
+.bu-ay-oge:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.bu-ay-etiket {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-size: var(--fs-label);
+  font-weight: 700;
+}
+.bu-ay-ikon {
+  flex-shrink: 0;
+}
+.bu-ay-cagri {
+  margin: 0.25rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.28rem;
+  line-height: 1.25;
+  color: var(--ink);
+}
+.bu-ay-durum {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-caption);
+}
+.bu-ay-cubuk {
+  display: block;
+  flex: none;
+  width: 100%;
+  max-width: 12rem;
+  height: 3px;
+  margin: 0.15rem 0;
+}
+/* Sütunlar farklı uzunlukta olsa da bağlantılar aynı hizada biter */
+.bu-ay-link {
+  margin-top: auto;
+  padding-top: 0.55rem;
+  color: var(--accent);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+.bu-ay-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (max-width: 640px) {
+  .bu-ay-bolum {
+    padding-inline: 0;
+  }
+  .bu-ay-liste {
+    grid-template-columns: 1fr;
+  }
+  .bu-ay-oge,
+  .bu-ay-oge:first-child {
+    padding: 0.95rem 0;
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .bu-ay-oge:first-child {
+    border-top: 0;
+    padding-top: 0.3rem;
+  }
+}
+
 .gecmis-bolum {
   padding-inline: var(--kart-ic-yatay);
   margin-top: var(--bolum-arasi);

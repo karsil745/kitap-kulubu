@@ -12,6 +12,8 @@ import { bulusmaEtiketi } from "../lib/time";
 import Cover from "../components/Cover";
 import QuoteOfTheDay from "../components/QuoteOfTheDay";
 import ReadingHistory from "../components/ReadingHistory";
+import BuAyKulupte from "../components/BuAyKulupte";
+import type { Shelf } from "../types";
 
 // Hero giriş animasyonu oturumda BİR KEZ oynar. Modül düzeyinde tutuluyor:
 // ana sayfaya her dönüşte bileşen yeniden kurulur, bu bayrak kurulmaz.
@@ -23,15 +25,18 @@ let heroGirisiOynadi = false;
 // Raflar girişe bağlı: ziyaretçide dinleyici açılmaz, sayı yerine davet çıkar.
 // Bölümün kapanış künyesi olarak duruyor (kutusuz); buluşma satırı da
 // `children` olarak altına giriyor, ikisi tek bir "kulüp" bloğu okunuyor.
+// Raflar HomePage'den geliyor: aynı kayıtları "Bu ay kulüpte" de kullanıyor,
+// tek dinleyici ikisine yetiyor.
 function KulupIlerlemesi({
   bookId,
+  shelves,
   children,
 }: {
   bookId: string;
+  shelves: Shelf[];
   children?: ReactNode;
 }) {
   const { currentUser } = useApp();
-  const shelves = useBookShelves(bookId);
   // Okuyanın kendi yeri: "ben de bu kulübün parçasıyım" hissi buradan geliyor.
   // Rafında yoksa hiçbir şey yazılmıyor.
   const benim = currentUser
@@ -144,16 +149,17 @@ export default function HomePage() {
   const leader = leaderId ? books.find((b) => b.id === leaderId) ?? null : null;
   const heroBook = botm ?? leader;
 
+  // Ayın kitabının rafları — kulüp ilerlemesi ve "Bu ay kulüpte" ortak
+  // kullanıyor. Kitap yoksa ya da ziyaretçiyse hook dinleyici açmıyor.
+  const kitapRaflari = useBookShelves(botm?.id ?? "");
+  const ayinKitabiHali = !!botm && !veriBekleniyor && !veriHatasi;
+
   return (
     <div>
       {/* `hero-ayin`: kitap belli olduğunda kart kalkıyor, bölüm doğrudan
           kâğıdın üstünde asimetrik bir sayfa düzenine geçiyor. Oylama ve
           yükleniyor hâlleri kartlı kalıyor. */}
-      <section
-        className={
-          botm && !veriBekleniyor && !veriHatasi ? "hero hero-ayin" : "hero"
-        }
-      >
+      <section className={ayinKitabiHali ? "hero hero-ayin" : "hero"}>
         {/* Kapak yokken sarmalayıcı da basılmaz: boş bir esnek öge, `gap`
             kadar hayalet bir girinti bırakıp metni bölüm başlıklarından
             farklı bir sol kenara itiyordu. */}
@@ -196,10 +202,11 @@ export default function HomePage() {
             </>
           ) : botm ? (
             <>
-              {/* "Bu ay kulüpte": bölüm bir kitap künyesi değil, kulübün
-                  şu anki hâli — ay bilgisi yanında soluk künye olarak. */}
+              {/* "Bu ay kulüpte" ifadesi hemen alttaki bölümün başlığı;
+                  burada tekrar etmesin diye etiket "Bu ayın kitabı". Ay
+                  bilgisi yanında soluk künye olarak. */}
               <span className="hero-eyebrow">
-                <span className="hero-eyebrow-vurgu">Bu ay kulüpte</span> ·{" "}
+                <span className="hero-eyebrow-vurgu">Bu ayın kitabı</span> ·{" "}
                 {monthLabel(month)}
               </span>
               <h1 className="hero-title-book">{botm.title}</h1>
@@ -219,7 +226,7 @@ export default function HomePage() {
                   Okuma takvimi →
                 </Link>
               </div>
-              <KulupIlerlemesi bookId={botm.id}>
+              <KulupIlerlemesi bookId={botm.id} shelves={kitapRaflari}>
                 {/* Buluşma yaklaşıyorsa ana sayfada da görünsün */}
                 {current?.meetingAt && current.meetingAt > Date.now() && (
                   <p className="hero-meeting">
@@ -285,8 +292,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Sayfanın hikâyesi: "bu ay ne okuyoruz → bugüne kadar neler okuduk"
-          → sessiz kapanış. */}
+      {/* Sayfanın hikâyesi: "bu ay ne okuyoruz → bu ay kulüpte ne
+          yapabilirim → bugüne kadar neler okuduk" → sessiz kapanış. Kitap
+          belli değilken bu bölüm hiç çıkmaz. */}
+      {ayinKitabiHali && botm && (
+        <BuAyKulupte book={botm} shelves={kitapRaflari} />
+      )}
+
       <ReadingHistory />
 
       <QuoteOfTheDay />

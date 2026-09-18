@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { usePageTitle } from "../hooks/usePageTitle";
 import Cover from "../components/Cover";
@@ -33,6 +33,29 @@ export default function BookDetailPage() {
     veriDurumu,
   } = useApp();
   const navigate = useNavigate();
+  const { hash } = useLocation();
+
+  // Ana sayfadaki "Bu ay kulüpte" bağlantıları (#tartisma, #alintilar) doğrudan
+  // ilgili bölüme insin. Tarayıcının kendi çapa kaydırması burada işlemiyor:
+  // bölümler veri geldikten sonra çiziliyor (tartışma soruları ayrı yükleniyor),
+  // o yüzden hedef belirene kadar kısa aralıklarla bakılıyor, en çok 3 sn.
+  useEffect(() => {
+    if (!hash) return;
+    const hedefId = decodeURIComponent(hash.slice(1));
+    const azHareket = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let deneme = 0;
+    const zamanlayici = window.setInterval(() => {
+      const hedef = document.getElementById(hedefId);
+      if (hedef) {
+        hedef.scrollIntoView({ behavior: azHareket ? "auto" : "smooth", block: "start" });
+        window.clearInterval(zamanlayici);
+      } else if (++deneme >= 30) {
+        window.clearInterval(zamanlayici);
+      }
+    }, 100);
+    return () => window.clearInterval(zamanlayici);
+  }, [hash, id]);
+
   // Yöneticinin sayfa sayısı düzeltmesi kaydedildi mi (koşulsuz çağrılmalı,
   // kitap bulunamadığında erken dönüş var).
   const [sayfaKaydedildi, setSayfaKaydedildi] = useState(false);
@@ -247,7 +270,7 @@ export default function BookDetailPage() {
         />
       </section>
 
-      <section className="quotes-box">
+      <section className="quotes-box" id="alintilar">
         <h2>Alıntılar</h2>
         <QuoteList
           quotes={quotes}

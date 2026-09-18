@@ -15,7 +15,8 @@ export default function Discussion({ bookId }: { bookId: string }) {
   if (d.questions.length === 0 && !isAdmin) return null;
 
   return (
-    <section className="discussion">
+    // id: ana sayfadaki "Bu ay kulüpte" bağlantısı (#tartisma) buraya iner
+    <section className="discussion" id="tartisma">
       <h2>Tartışma</h2>
 
       {d.questions.length === 0 ? (
