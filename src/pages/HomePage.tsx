@@ -74,13 +74,20 @@ function KulupIlerlemesi({
         <span className="kulup-ilerleme-etiket">Kulüp okuma ilerlemesi</span>
         {katilan > 0 && <span className="kulup-ilerleme-yuzde">%{yuzde}</span>}
       </div>
+      {/* Veri yokken (ziyaretçi ya da henüz kimse başlamamış) değer
+          bilinmiyor: ekran okuyucuya "%0" dedirtmemek için çubuk yalnızca
+          görsel kalıyor, durumu altındaki cümle anlatıyor. */}
       <span
         className="progress-track kulup-ilerleme-cubuk"
-        role="progressbar"
-        aria-label="Kulüp okuma ilerlemesi"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={yuzde}
+        {...(katilan > 0
+          ? {
+              role: "progressbar",
+              "aria-label": "Kulüp okuma ilerlemesi",
+              "aria-valuemin": 0,
+              "aria-valuemax": 100,
+              "aria-valuenow": yuzde,
+            }
+          : { "aria-hidden": true })}
       >
         <span className="progress-fill" style={{ width: `${yuzde}%` }} />
       </span>
