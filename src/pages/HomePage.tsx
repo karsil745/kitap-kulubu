@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { useBookShelves } from "../hooks/useShelves";
@@ -7,7 +7,7 @@ import { useSchedule } from "../hooks/useSchedule";
 import { useVoting } from "../hooks/useVoting";
 import { useKatilim } from "../hooks/useKatilim";
 import { currentMonth, monthLabel } from "../lib/month";
-import { gercekAciklama } from "../lib/text";
+import { gercekAciklama, kisaAciklama } from "../lib/text";
 import { bulusmaEtiketi } from "../lib/time";
 import Cover from "../components/Cover";
 import QuoteOfTheDay from "../components/QuoteOfTheDay";
@@ -21,9 +21,28 @@ let heroGirisiOynadi = false;
 // ayrı bir koleksiyon yok. Kitabı "okuyorum" ya da "okudum" diye rafına almış
 // üyelerin ortalaması: okuyanın kendi yüzdesi, bitirenin %100'ü.
 // Raflar girişe bağlı: ziyaretçide dinleyici açılmaz, sayı yerine davet çıkar.
-function KulupIlerlemesi({ bookId }: { bookId: string }) {
+// Bölümün kapanış künyesi olarak duruyor (kutusuz); buluşma satırı da
+// `children` olarak altına giriyor, ikisi tek bir "kulüp" bloğu okunuyor.
+function KulupIlerlemesi({
+  bookId,
+  children,
+}: {
+  bookId: string;
+  children?: ReactNode;
+}) {
   const { currentUser } = useApp();
   const shelves = useBookShelves(bookId);
+  // Okuyanın kendi yeri: "ben de bu kulübün parçasıyım" hissi buradan geliyor.
+  // Rafında yoksa hiçbir şey yazılmıyor.
+  const benim = currentUser
+    ? shelves.find((s) => s.userId === currentUser.id)
+    : undefined;
+  const benimNotum =
+    benim?.status === "read"
+      ? "sen bitirdin"
+      : benim?.status === "reading"
+        ? `senin ilerlemen %${benim.progress ?? 0}`
+        : null;
 
   const okuyan = shelves.filter((s) => s.status === "reading").length;
   const bitiren = shelves.filter((s) => s.status === "read").length;
@@ -75,11 +94,16 @@ function KulupIlerlemesi({ bookId }: { bookId: string }) {
             <Link to={`/kitap/${bookId}`}>Rafına ekleyen ilk sen ol →</Link>
           </>
         ) : (
-          [okuyan > 0 && `${okuyan} üye okuyor`, bitiren > 0 && `${bitiren} üye bitirdi`]
+          [
+            okuyan > 0 && `${okuyan} üye okuyor`,
+            bitiren > 0 && `${bitiren} üye bitirdi`,
+            benimNotum,
+          ]
             .filter(Boolean)
             .join(" · ")
         )}
       </p>
+      {children}
     </div>
   );
 }
@@ -122,15 +146,22 @@ export default function HomePage() {
 
   return (
     <div>
-      <section className="hero">
+      {/* `hero-ayin`: kitap belli olduğunda kart kalkıyor, bölüm doğrudan
+          kâğıdın üstünde asimetrik bir sayfa düzenine geçiyor. Oylama ve
+          yükleniyor hâlleri kartlı kalıyor. */}
+      <section
+        className={
+          botm && !veriBekleniyor && !veriHatasi ? "hero hero-ayin" : "hero"
+        }
+      >
         {/* Kapak yokken sarmalayıcı da basılmaz: boş bir esnek öge, `gap`
             kadar hayalet bir girinti bırakıp metni bölüm başlıklarından
             farklı bir sol kenara itiyordu. */}
         {heroBook && (
-          // Sahne: kapağın arkasında, kapağın kendi renklerinden gelen çok
-          // hafif bir yıkama. Kartın tamamına görsel koymak 2026-08-16'da
-          // denenip geri alındı (PLAN-HAREKET.md); bu yalnızca kapak sütununda
-          // kalıyor, metnin zemini ve kontrastı değişmiyor.
+          // Sahne: kapağın hemen arkasında, kapağın kendi renklerinden gelen
+          // kenarsız, çok hafif bir hale. Bölümün tamamına görsel koymak
+          // 2026-08-16'da denenip geri alındı (PLAN-HAREKET.md); bu yalnızca
+          // kapağın çevresinde kalıyor, metnin zemini değişmiyor.
           <div
             className={botm ? "hero-cover hero-sahne" : "hero-cover"}
             style={
@@ -165,18 +196,21 @@ export default function HomePage() {
             </>
           ) : botm ? (
             <>
-              {/* Ay tek başına, kitabın NEDEN orada olduğunu söylemiyor;
-                  ikisi birlikte duruyor. */}
+              {/* "Bu ay kulüpte": bölüm bir kitap künyesi değil, kulübün
+                  şu anki hâli — ay bilgisi yanında soluk künye olarak. */}
               <span className="hero-eyebrow">
-                <span className="hero-eyebrow-vurgu">Bu ayın kitabı</span> ·{" "}
+                <span className="hero-eyebrow-vurgu">Bu ay kulüpte</span> ·{" "}
                 {monthLabel(month)}
               </span>
               <h1 className="hero-title-book">{botm.title}</h1>
               <p className="hero-author">{botmAuthor?.name}</p>
+              {/* Ana sayfada merak uyandıracak kadar; tam özet kitap
+                  sayfasında. */}
               {gercekAciklama(botm.description) && (
-                <p className="hero-desc">{gercekAciklama(botm.description)}</p>
+                <p className="hero-desc">
+                  {kisaAciklama(gercekAciklama(botm.description)!)}
+                </p>
               )}
-              <KulupIlerlemesi bookId={botm.id} />
               <div className="hero-cta">
                 <Link to={`/kitap/${botm.id}`} className="btn-primary hero-cta-ana">
                   Kitabı incele →
@@ -185,14 +219,16 @@ export default function HomePage() {
                   Okuma takvimi →
                 </Link>
               </div>
-              {/* Buluşma yaklaşıyorsa ana sayfada da görünsün */}
-              {current?.meetingAt && current.meetingAt > Date.now() && (
-                <p className="hero-meeting">
-                  Buluşma · {bulusmaEtiketi(current.meetingAt)}
-                  {/* Sayı 0 ise hiç yazma — boş sayı kimseyi teşvik etmez */}
-                  {gelenler.length > 0 && ` · ${gelenler.length} kişi geliyor`}
-                </p>
-              )}
+              <KulupIlerlemesi bookId={botm.id}>
+                {/* Buluşma yaklaşıyorsa ana sayfada da görünsün */}
+                {current?.meetingAt && current.meetingAt > Date.now() && (
+                  <p className="hero-meeting">
+                    Buluşma · {bulusmaEtiketi(current.meetingAt)}
+                    {/* Sayı 0 ise hiç yazma — boş sayı kimseyi teşvik etmez */}
+                    {gelenler.length > 0 && ` · ${gelenler.length} kişi geliyor`}
+                  </p>
+                )}
+              </KulupIlerlemesi>
             </>
           ) : (
             <>

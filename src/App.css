@@ -2387,59 +2387,116 @@ textarea {
   font-style: normal;
 }
 
-/* --- Ayın kitabı: sahne, ilerleme, ana çağrı (2026-09-18) --- */
-/* Boşluk bir basamak daraldı: kart artık ilerleme satırıyla doluyor, eski
-   taban yükseklik kısa açıklamalı kitaplarda ölü boşluk bırakıyordu. */
-.hero {
-  min-height: min(50vh, 430px);
-}
-.hero-desc {
-  margin-bottom: 1.4rem;
+/* --- Ayın kitabı: editoryal sahne (2026-09-18, ikinci tur) --- */
+/* Kitap belli olduğunda hero kart olmaktan çıkıyor: beyaz kart + iki kolon
+   "ürün bilgi kartı" gibi duruyordu. Bölüm doğrudan kâğıdın üstünde,
+   asimetrik bir dergi sayfası düzeninde. Yatay iç boşluk korunuyor ki metin
+   alttaki bölümlerle aynı sol eksende kalsın. Oylama/yükleniyor hâlleri
+   kartlı kalıyor (bu sınıf yalnızca kitap belliyken ekleniyor). */
+.hero.hero-ayin {
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  min-height: 0;
+  align-items: center;
+  gap: clamp(2rem, 6vw, 5.5rem);
+  padding-block: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 3vw, 2.5rem);
 }
 
-/* Sahne: kapağın arkasında, kapağın kendi renklerinden süzülmüş çok hafif
-   bir yıkama. Kartın tamamına görsel koymak 2026-08-16'da geri alındı
-   (PLAN-HAREKET.md) — bu yalnızca kapak sütununda, metne dokunmuyor.
-   Gradyan ya da parlama yok: kapak görseli bulanıklaştırılıp soluklaştırılıyor,
-   kapak resmi yoksa yalnızca sıcak kâğıt tonu kalıyor. */
+/* Sahne: kapağın çevresinde kenarsız, çok hafif bir hale. Kapak görseli
+   bulanıklaştırılıp soluklaştırılıyor; dikdörtgen bir panel yok, renk
+   kâğıda kendiliğinden karışıyor. Kapak resmi yoksa hale de yok. */
 .hero-sahne {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
-  padding: clamp(1.4rem, 3vw, 2.4rem);
-  border-radius: var(--radius-lg);
-  background: var(--accent-tint);
 }
 .hero-sahne::before {
   content: "";
   position: absolute;
-  inset: -15%;
+  inset: 8% -6% 4%;
   z-index: -1;
   background-image: var(--sahne-kapak, none);
   background-size: cover;
   background-position: center;
-  filter: blur(40px) saturate(0.85);
-  opacity: 0.55;
+  filter: blur(56px) saturate(0.8);
+  opacity: 0.42;
+  border-radius: 50%;
 }
 :root[data-theme="dark"] .hero-sahne::before {
-  opacity: 0.35;
-}
-/* Sahnede kapak odak noktası: gölge biraz daha derin ve yakın */
-.hero-sahne .hero-book img {
-  box-shadow: 0 34px 60px -24px rgba(30, 20, 12, 0.6),
-    0 6px 14px -6px rgba(30, 20, 12, 0.3);
+  opacity: 0.28;
 }
 
-/* Etiketin "Bu ayın kitabı" kısmı vurgu renginde: ay bilgisi künye olarak
-   soluk kalır, bölümün ne olduğu ilk bakışta okunur. */
+/* Kapak sahnenin ana görseli: 3B dönüş ve sırt yüzeyi burada kalkıyor
+   (düz bir kitap, kâğıda bırakılmış gibi). Hover yalnızca hafif kalkış. */
+.hero-ayin .hero-book,
+.hero-ayin .hero-book:hover {
+  transform: none;
+}
+.hero-ayin .hero-book {
+  transition: translate 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.hero-ayin .hero-book:hover {
+  translate: 0 -4px;
+}
+.hero-ayin .hero-book::before {
+  display: none;
+}
+.hero-ayin .hero-book img {
+  width: clamp(230px, 27vw, 330px);
+  border-radius: 2px 6px 6px 2px;
+  box-shadow: 0 1px 0 rgba(30, 20, 12, 0.08),
+    0 28px 50px -26px rgba(30, 20, 12, 0.55),
+    0 10px 20px -12px rgba(30, 20, 12, 0.25);
+}
+
+/* Metin sütunu kapaktan biraz aşağıda başlıyor: iki kolonun üst kenarı
+   aynı hizaya gelince yine "tablo" gibi okunuyordu. */
+.hero-ayin .hero-text {
+  max-width: 34rem;
+  padding-top: clamp(0rem, 2vw, 1.5rem);
+}
+.hero-ayin .hero-eyebrow {
+  margin-bottom: 1.1rem;
+}
 .hero-eyebrow-vurgu {
   color: var(--accent);
 }
 
-/* Kulüp okuma ilerlemesi: kutusuz, künye dilinde bir satır grubu */
+/* Kitap adı: Cormorant Garamond — klasik kitap sayfası sesi. Küçük x
+   yüksekliği yüzünden Fraunces'ten bir basamak iri. */
+.hero.hero-ayin h1.hero-title-book {
+  font-family: var(--font-kitap);
+  font-weight: 500;
+  font-size: clamp(3rem, 6.6vw, 5.2rem);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.hero-ayin .hero-author {
+  font-family: var(--font-kitap);
+  font-style: italic;
+  font-size: clamp(1.25rem, 1.9vw, 1.5rem);
+  color: var(--ink-2);
+  margin: 0.55rem 0 1.3rem;
+}
+.hero-ayin .hero-desc {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 1.6rem;
+}
+
+/* Ana çağrı: bölümün tek dolgulu ve en iri eylemi */
+.hero .hero-cta-ana {
+  padding: 0.95rem 2rem;
+  font-size: 0.8rem;
+  box-shadow: var(--shadow);
+}
+
+/* Kulüp okuma ilerlemesi: widget değil, bölümün kapanış künyesi. Kutu yok;
+   yüzde serif rakamla, çubuk kılcal. Buluşma satırı da bu bloğun içinde. */
 .kulup-ilerleme {
-  max-width: 380px;
-  margin: 0 0 1.7rem;
+  margin-top: 2.2rem;
+  max-width: 26rem;
 }
 .kulup-ilerleme-bas {
   display: flex;
@@ -2455,27 +2512,41 @@ textarea {
   font-weight: 700;
 }
 .kulup-ilerleme-yuzde {
-  font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-family: var(--font-kitap);
+  font-size: 1.9rem;
+  font-weight: 500;
   line-height: 1;
   color: var(--ink);
 }
 .kulup-ilerleme-cubuk {
   display: block;
-  height: 6px;
-  margin: 0.55rem 0 0.5rem;
+  height: 3px;
+  margin: 0.5rem 0 0.55rem;
 }
 .kulup-ilerleme-not {
   margin: 0;
   color: var(--muted);
   font-size: var(--fs-caption);
 }
+.kulup-ilerleme .hero-meeting {
+  margin-top: 0.35rem;
+  font-size: var(--fs-caption);
+}
 
-/* Ana çağrı: bölümün tek dolgulu ve en iri eylemi */
-.hero .hero-cta-ana {
-  padding: 0.95rem 2rem;
-  font-size: 0.8rem;
-  box-shadow: var(--shadow);
+@media (max-width: 640px) {
+  .hero.hero-ayin {
+    padding-inline: 0;
+    gap: 1.8rem;
+  }
+  .hero-ayin .hero-book img {
+    width: min(62vw, 240px);
+  }
+  .hero-ayin .hero-text {
+    padding-top: 0;
+  }
+  .kulup-ilerleme {
+    max-width: none;
+  }
 }
 
 /* Bölüm başlığı: kılcal çizgi kalıyor (editoryal iz), ama koyu değil açık ton */
